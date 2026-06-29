@@ -233,6 +233,11 @@ function PlannerPage() {
                                             <Check className="h-3 w-3" /> Auditován
                                           </span>
                                         )}
+                                        {isMissed && (
+                                          <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider bg-red-600 text-white px-1.5 py-0.5">
+                                            <X className="h-3 w-3" /> Neproveden
+                                          </span>
+                                        )}
                                         <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />
                                       </div>
                                     </div>
