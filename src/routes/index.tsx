@@ -45,7 +45,8 @@ function PlannerPage() {
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(6); // 0-based → červenec
   const { active: zones } = useZonesStore();
-  const { active: auditors } = useAuditorsStore();
+  const { all: allAuditors, active: auditors } = useAuditorsStore();
+
   const [expanded, setExpanded] = useState<string | null>(null);
 
 
