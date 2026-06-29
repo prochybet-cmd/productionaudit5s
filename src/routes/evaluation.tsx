@@ -102,18 +102,37 @@ function EvaluationPage() {
 
     const series = Array.from(groups.keys()).sort();
     const chartData = CATEGORIES.map((c) => {
-      const row: Record<string, string | number> = { category: `${c.code}` };
+      const row: Record<string, string | number> = {
+        category: c.cs,
+        // background concentric bands (drawn outermost → innermost)
+        band5: 5, band4: 4, band3: 3, band2: 2, band1: 1,
+      };
       for (const key of series) {
         const g = groups.get(key)!;
         const sum = g.sumByCat[c.key] ?? 0;
         const cnt = g.countByCat[c.key] ?? 0;
-        // průměrné skóre na položku → procenta z 5
-        row[key] = cnt > 0 ? Math.round((sum / cnt / 5) * 100) : 0;
+        // průměrné skóre na položku (0–5)
+        row[key] = cnt > 0 ? Number((sum / cnt).toFixed(2)) : 0;
       }
       return row;
     });
     return { series, data: chartData };
   }, [filtered, groupBy]);
+
+  // Detailed breakdown per category (for side panel)
+  const breakdown = useMemo(() => {
+    if (!filtered) return [];
+    return CATEGORIES.map((c) => {
+      const auditCount = filtered.audits.length;
+      const itemsPerCat = c.max / 5; // count of items in category
+      const maxScore = auditCount * c.max;
+      const scoresInCat = filtered.scores.filter((s) => s.category === c.key);
+      const gained = scoresInCat.reduce((acc, s) => acc + s.score, 0);
+      const avg = scoresInCat.length > 0 ? gained / scoresInCat.length : 0;
+      const pct = maxScore > 0 ? Math.round((gained / maxScore) * 100) : 0;
+      return { cs: c.cs, itemsPerCat, maxScore, gained, avg, pct };
+    });
+  }, [filtered]);
 
   const trendData = useMemo(() => {
     if (!filtered) return [];
@@ -219,32 +238,119 @@ function EvaluationPage() {
       ) : (
         <>
           <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000]">
-            <div className="font-display text-2xl tracking-wider mb-2">
-              Pavučinový graf — {groupBy === "zone" ? "podle zón" : groupBy === "auditor" ? "podle auditorů" : "podle měsíců"}
+            <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
+              <div className="font-display text-2xl tracking-wider">
+                Pavučinový graf 5S
+              </div>
+              <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                {groupBy === "zone" ? "podle zón (Z)" : groupBy === "auditor" ? "podle auditorů" : "podle měsíců"} · škála 0–5
+              </div>
             </div>
-            <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-4">
-              Průměr % v 5 kategoriích · škála 0–100
-            </div>
-            <div className="h-[480px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={radarData.data} outerRadius="75%">
-                  <PolarGrid stroke="hsl(var(--border))" />
-                  <PolarAngleAxis dataKey="category" tick={{ fontSize: 12, fontFamily: "monospace" }} />
-                  <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
-                  {radarData.series.map((key, i) => (
-                    <Radar
-                      key={key}
-                      name={key}
-                      dataKey={key}
-                      stroke={RADAR_COLORS[i % RADAR_COLORS.length]}
-                      fill={RADAR_COLORS[i % RADAR_COLORS.length]}
-                      fillOpacity={radarData.series.length === 1 ? 0.35 : 0.15}
+
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+              {/* Radar */}
+              <div className="h-[520px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadarChart data={radarData.data} outerRadius="78%">
+                    <PolarGrid stroke="#000" strokeOpacity={0.35} />
+                    <PolarAngleAxis
+                      dataKey="category"
+                      tick={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700, fill: "#000" }}
                     />
-                  ))}
-                  <Tooltip />
-                  <Legend wrapperStyle={{ fontFamily: "monospace", fontSize: 11 }} />
-                </RadarChart>
-              </ResponsiveContainer>
+                    <PolarRadiusAxis
+                      angle={90}
+                      domain={[0, 5]}
+                      tickCount={6}
+                      tick={{ fontSize: 10, fill: "#000" }}
+                      stroke="#000"
+                    />
+                    {/* Background colored bands: outermost first so inner colors overlay */}
+                    <Radar dataKey="band5" stroke="#000" strokeOpacity={0.4} fill="#2196f3" fillOpacity={1} isAnimationActive={false} legendType="none" />
+                    <Radar dataKey="band4" stroke="#000" strokeOpacity={0.4} fill="#8bc34a" fillOpacity={1} isAnimationActive={false} legendType="none" />
+                    <Radar dataKey="band3" stroke="#000" strokeOpacity={0.4} fill="#ffeb3b" fillOpacity={1} isAnimationActive={false} legendType="none" />
+                    <Radar dataKey="band2" stroke="#000" strokeOpacity={0.4} fill="#ff9800" fillOpacity={1} isAnimationActive={false} legendType="none" />
+                    <Radar dataKey="band1" stroke="#000" strokeOpacity={0.4} fill="#f44336" fillOpacity={1} isAnimationActive={false} legendType="none" />
+                    {/* Real data on top */}
+                    {radarData.series.map((key, i) => (
+                      <Radar
+                        key={key}
+                        name={key}
+                        dataKey={key}
+                        stroke={radarData.series.length === 1 ? "#000" : RADAR_COLORS[i % RADAR_COLORS.length]}
+                        strokeWidth={radarData.series.length === 1 ? 3 : 2.5}
+                        fill="transparent"
+                        fillOpacity={0}
+                        isAnimationActive={false}
+                      />
+                    ))}
+                    <Tooltip
+                      contentStyle={{ fontFamily: "monospace", fontSize: 12, border: "2px solid #000" }}
+                      formatter={(v: number, name: string) =>
+                        typeof name === "string" && name.startsWith("band") ? [null, null] : [v, name]
+                      }
+                    />
+                    <Legend
+                      wrapperStyle={{ fontFamily: "monospace", fontSize: 11 }}
+                      payload={radarData.series.map((key, i) => ({
+                        value: key,
+                        type: "line",
+                        color: radarData.series.length === 1 ? "#000" : RADAR_COLORS[i % RADAR_COLORS.length],
+                      }))}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Side breakdown panel */}
+              <div className="space-y-2">
+                {breakdown.map((b) => (
+                  <div key={b.cs} className="border-2 border-ink">
+                    <div className="bg-primary text-ink text-center font-mono text-xs font-bold py-1 border-b-2 border-ink">
+                      {b.cs}
+                    </div>
+                    <div className="grid grid-cols-2 text-[11px] font-mono">
+                      <div className="px-2 py-0.5 border-b border-ink/30">Maximální skóre</div>
+                      <div className="px-2 py-0.5 border-b border-ink/30 text-right">{b.maxScore}</div>
+                      <div className="px-2 py-0.5 border-b border-ink/30">Získané skóre</div>
+                      <div className="px-2 py-0.5 border-b border-ink/30 text-right">{b.gained}</div>
+                      <div className="px-2 py-0.5 border-b border-ink/30">Hodnocení (Ø)</div>
+                      <div className="px-2 py-0.5 border-b border-ink/30 text-right">{b.avg.toFixed(1)}</div>
+                      <div className="px-2 py-0.5 font-bold">Výsledek</div>
+                      <div className="px-2 py-0.5 text-right font-bold">{b.pct} %</div>
+                    </div>
+                  </div>
+                ))}
+                <div className="border-2 border-ink bg-ink text-white">
+                  <div className="text-center font-mono text-xs font-bold py-1 border-b-2 border-white/30">
+                    Celkové skóre
+                  </div>
+                  <div className="grid grid-cols-2 text-[11px] font-mono">
+                    <div className="px-2 py-0.5">Maximální skóre</div>
+                    <div className="px-2 py-0.5 text-right">{breakdown.reduce((a, b) => a + b.maxScore, 0)}</div>
+                    <div className="px-2 py-0.5">Získané skóre</div>
+                    <div className="px-2 py-0.5 text-right">{breakdown.reduce((a, b) => a + b.gained, 0)}</div>
+                    <div className="px-2 py-0.5 font-bold">Výsledek</div>
+                    <div className="px-2 py-0.5 text-right font-bold">{avgPct} %</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Score legend (0–5 bands) */}
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-1 mt-5 text-[10px] font-mono">
+              {[
+                { n: 0, color: "#f44336", label: "Nebylo zahájeno" },
+                { n: 1, color: "#f44336", label: "Aktivita zahájena" },
+                { n: 2, color: "#ff9800", label: "Rozšířená aktivita" },
+                { n: 3, color: "#ffeb3b", label: "Min. přijatelná úroveň" },
+                { n: 4, color: "#8bc34a", label: "Best in class" },
+                { n: 5, color: "#2196f3", label: "Best Practice / World Class" },
+              ].map((l) => (
+                <div key={l.n} className="border-2 border-ink p-1.5 text-center" style={{ background: l.color }}>
+                  <div className="text-base font-bold leading-tight">{l.n}</div>
+                  <div className="leading-tight">{l.label}</div>
+                </div>
+              ))}
             </div>
           </section>
 
