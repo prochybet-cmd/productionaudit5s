@@ -88,7 +88,7 @@ export const MACHINES: MachineRow[] = [
   { zone: "Z2", line: "L5", project: "PPE/C", machine: "RF002" },
 ];
 
-export const Z_GROUP_ORDER = ["Z1-A", "Z1-B", "Z2", "Z3", "Z?"];
+export const Z_GROUP_ORDER = ["Z1-A", "Z1-B", "Z2", "Z3"];
 export const LINE_ORDER = [
   "L1","L2","L3","L4","L5","L6","L7","L8","L9","L10","L11","L12","L20",
 ];
