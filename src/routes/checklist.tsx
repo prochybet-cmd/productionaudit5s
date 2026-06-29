@@ -10,6 +10,7 @@ import {
   CHECKLIST,
   MAX_TOTAL,
   SCORE_OPTIONS,
+  SCORE_LEGEND,
   scoreLabel,
 } from "@/lib/checklist";
 import { DEFAULT_AUDITORS, DEFAULT_ZONES } from "@/lib/scheduler";
