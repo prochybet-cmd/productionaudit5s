@@ -51,6 +51,7 @@ export const Route = createFileRoute("/")({
 
 function PlannerPage() {
   const today = new Date();
+  const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth()); // 0-based
   const [zones, setZones] = useState<string[]>(DEFAULT_ZONES);
@@ -70,6 +71,7 @@ function PlannerPage() {
   const totalAudits = plan.assignments.length;
   const auditorsUsed = new Set(plan.assignments.map((a) => a.auditor)).size;
   const zonesCovered = new Set(plan.assignments.map((a) => a.zone)).size;
+  const todaysAudits = plan.assignments.filter((a) => a.date === todayIso);
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8 space-y-8">
