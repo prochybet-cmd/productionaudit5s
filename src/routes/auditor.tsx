@@ -35,6 +35,12 @@ function AuditorPage() {
   const [query, setQuery] = useState("");
   const [confirmed, setConfirmed] = useState<string | null>(null);
 
+  const goto = (delta: number) => {
+    const d = new Date(year, month + delta, 1);
+    setYear(d.getFullYear());
+    setMonth(d.getMonth());
+  };
+
   const plan = useMemo(
     () => generatePlan({ year, month }),
     [year, month],
