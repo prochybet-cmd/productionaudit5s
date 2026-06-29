@@ -54,7 +54,7 @@ const SCORE_COLORS = SCORE_LEGEND.map((s) => {
   return m ? m[0] : "#999";
 });
 
-type GroupBy = "zone" | "auditor" | "month";
+
 
 function EvaluationPage() {
   const [zoneFilter, setZoneFilter] = useState<string>("");
