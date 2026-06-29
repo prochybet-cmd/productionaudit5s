@@ -200,14 +200,6 @@ function EvaluationPage() {
             {months.map((m) => <option key={m} value={m}>{m}</option>)}
           </select>
         </div>
-        <div className="space-y-1.5">
-          <Label className="font-mono text-[10px] uppercase tracking-[0.2em]">Porovnat dle</Label>
-          <select value={groupBy} onChange={(e) => setGroupBy(e.target.value as GroupBy)} className="w-full border-2 border-input bg-background px-3 py-2 font-mono text-sm">
-            <option value="zone">Zóny</option>
-            <option value="auditor">Auditora</option>
-            <option value="month">Měsíce</option>
-          </select>
-        </div>
       </section>
 
       {/* KPIs */}
