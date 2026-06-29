@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ZonesRouteImport } from './routes/zones'
 import { Route as ChecklistRouteImport } from './routes/checklist'
 import { Route as AuditorRouteImport } from './routes/auditor'
+import { Route as ArchiveRouteImport } from './routes/archive'
 import { Route as IndexRouteImport } from './routes/index'
 
 const ZonesRoute = ZonesRouteImport.update({
@@ -29,6 +30,11 @@ const AuditorRoute = AuditorRouteImport.update({
   path: '/auditor',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArchiveRoute = ArchiveRouteImport.update({
+  id: '/archive',
+  path: '/archive',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -37,12 +43,14 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/archive': typeof ArchiveRoute
   '/auditor': typeof AuditorRoute
   '/checklist': typeof ChecklistRoute
   '/zones': typeof ZonesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/archive': typeof ArchiveRoute
   '/auditor': typeof AuditorRoute
   '/checklist': typeof ChecklistRoute
   '/zones': typeof ZonesRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/archive': typeof ArchiveRoute
   '/auditor': typeof AuditorRoute
   '/checklist': typeof ChecklistRoute
   '/zones': typeof ZonesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auditor' | '/checklist' | '/zones'
+  fullPaths: '/' | '/archive' | '/auditor' | '/checklist' | '/zones'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auditor' | '/checklist' | '/zones'
-  id: '__root__' | '/' | '/auditor' | '/checklist' | '/zones'
+  to: '/' | '/archive' | '/auditor' | '/checklist' | '/zones'
+  id: '__root__' | '/' | '/archive' | '/auditor' | '/checklist' | '/zones'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ArchiveRoute: typeof ArchiveRoute
   AuditorRoute: typeof AuditorRoute
   ChecklistRoute: typeof ChecklistRoute
   ZonesRoute: typeof ZonesRoute
@@ -92,6 +102,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuditorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/archive': {
+      id: '/archive'
+      path: '/archive'
+      fullPath: '/archive'
+      preLoaderRoute: typeof ArchiveRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ArchiveRoute: ArchiveRoute,
   AuditorRoute: AuditorRoute,
   ChecklistRoute: ChecklistRoute,
   ZonesRoute: ZonesRoute,
