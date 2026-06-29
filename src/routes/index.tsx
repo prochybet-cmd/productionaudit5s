@@ -71,7 +71,10 @@ function PlannerPage() {
   const totalAudits = plan.assignments.length;
   const auditorsUsed = new Set(plan.assignments.map((a) => a.auditor)).size;
   const zonesCovered = new Set(plan.assignments.map((a) => a.zone)).size;
-  const todaysAudits = plan.assignments.filter((a) => a.date === todayIso);
+
+  const currentWeek = plan.weeks.find((w) => w.days.some((d) => d.date === todayIso));
+  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8 space-y-8">
