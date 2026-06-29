@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ZonesRouteImport } from './routes/zones'
+import { Route as ChecklistRouteImport } from './routes/checklist'
 import { Route as AuditorRouteImport } from './routes/auditor'
 import { Route as IndexRouteImport } from './routes/index'
 
 const ZonesRoute = ZonesRouteImport.update({
   id: '/zones',
   path: '/zones',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChecklistRoute = ChecklistRouteImport.update({
+  id: '/checklist',
+  path: '/checklist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuditorRoute = AuditorRouteImport.update({
@@ -32,30 +38,34 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auditor': typeof AuditorRoute
+  '/checklist': typeof ChecklistRoute
   '/zones': typeof ZonesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auditor': typeof AuditorRoute
+  '/checklist': typeof ChecklistRoute
   '/zones': typeof ZonesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auditor': typeof AuditorRoute
+  '/checklist': typeof ChecklistRoute
   '/zones': typeof ZonesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auditor' | '/zones'
+  fullPaths: '/' | '/auditor' | '/checklist' | '/zones'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auditor' | '/zones'
-  id: '__root__' | '/' | '/auditor' | '/zones'
+  to: '/' | '/auditor' | '/checklist' | '/zones'
+  id: '__root__' | '/' | '/auditor' | '/checklist' | '/zones'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuditorRoute: typeof AuditorRoute
+  ChecklistRoute: typeof ChecklistRoute
   ZonesRoute: typeof ZonesRoute
 }
 
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/zones'
       fullPath: '/zones'
       preLoaderRoute: typeof ZonesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checklist': {
+      id: '/checklist'
+      path: '/checklist'
+      fullPath: '/checklist'
+      preLoaderRoute: typeof ChecklistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auditor': {
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuditorRoute: AuditorRoute,
+  ChecklistRoute: ChecklistRoute,
   ZonesRoute: ZonesRoute,
 }
 export const routeTree = rootRouteImport
