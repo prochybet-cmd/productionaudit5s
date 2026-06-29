@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { CHECKLIST } from "@/lib/checklist";
+import { CHECKLIST, SCORE_LEGEND } from "@/lib/checklist";
 import { DEFAULT_AUDITORS } from "@/lib/scheduler";
 
 // Mapping of Z-groups (reporting zones) to underlying L-zones (audit zones)
