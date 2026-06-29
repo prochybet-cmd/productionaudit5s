@@ -102,18 +102,37 @@ function EvaluationPage() {
 
     const series = Array.from(groups.keys()).sort();
     const chartData = CATEGORIES.map((c) => {
-      const row: Record<string, string | number> = { category: `${c.code}` };
+      const row: Record<string, string | number> = {
+        category: c.cs,
+        // background concentric bands (drawn outermost → innermost)
+        band5: 5, band4: 4, band3: 3, band2: 2, band1: 1,
+      };
       for (const key of series) {
         const g = groups.get(key)!;
         const sum = g.sumByCat[c.key] ?? 0;
         const cnt = g.countByCat[c.key] ?? 0;
-        // průměrné skóre na položku → procenta z 5
-        row[key] = cnt > 0 ? Math.round((sum / cnt / 5) * 100) : 0;
+        // průměrné skóre na položku (0–5)
+        row[key] = cnt > 0 ? Number((sum / cnt).toFixed(2)) : 0;
       }
       return row;
     });
     return { series, data: chartData };
   }, [filtered, groupBy]);
+
+  // Detailed breakdown per category (for side panel)
+  const breakdown = useMemo(() => {
+    if (!filtered) return [];
+    return CATEGORIES.map((c) => {
+      const auditCount = filtered.audits.length;
+      const itemsPerCat = c.max / 5; // count of items in category
+      const maxScore = auditCount * c.max;
+      const scoresInCat = filtered.scores.filter((s) => s.category === c.key);
+      const gained = scoresInCat.reduce((acc, s) => acc + s.score, 0);
+      const avg = scoresInCat.length > 0 ? gained / scoresInCat.length : 0;
+      const pct = maxScore > 0 ? Math.round((gained / maxScore) * 100) : 0;
+      return { cs: c.cs, itemsPerCat, maxScore, gained, avg, pct };
+    });
+  }, [filtered]);
 
   const trendData = useMemo(() => {
     if (!filtered) return [];
