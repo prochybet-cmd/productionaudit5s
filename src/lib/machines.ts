@@ -84,8 +84,8 @@ export const MACHINES: MachineRow[] = [
   { zone: "Z2", line: "L12", project: "730B", machine: "PI510" },
   // L12 — Dílna op.
   { zone: "Z2", line: "L12", project: "různé", machine: "Dílna op." },
-  // Z2 / L5
-  { zone: "Z2", line: "L5", project: "PPE/C", machine: "RF002" },
+  // Z2 / L4
+  { zone: "Z2", line: "L4", project: "PPE/C", machine: "RF002" },
 ];
 
 export const Z_GROUP_ORDER = ["Z1-A", "Z1-B", "Z2", "Z3"];
