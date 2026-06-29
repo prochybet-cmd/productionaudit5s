@@ -253,7 +253,7 @@ function EvaluationPage() {
         </div>
       ) : (
         <>
-          <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000]">
+          <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000] print-radar">
             <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
               <div className="font-display text-2xl tracking-wider">
                 Pavučinový graf 5S
