@@ -54,7 +54,7 @@ function EvaluationPage() {
   const [zoneFilter, setZoneFilter] = useState<string>("");
   const [auditorFilter, setAuditorFilter] = useState<string>("");
   const [monthFilter, setMonthFilter] = useState<string>("");
-  const [groupBy, setGroupBy] = useState<GroupBy>("zone");
+  
 
   const { data, isLoading } = useQuery({
     queryKey: ["evaluation"],
