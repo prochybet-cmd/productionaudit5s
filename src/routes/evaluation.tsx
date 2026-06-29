@@ -150,11 +150,34 @@ function EvaluationPage() {
       {/* A4 print stylesheet — hides everything except the radar panel */}
       <style>{`
         @media print {
-          @page { size: A4 landscape; margin: 10mm; }
+          @page { size: A4 landscape; margin: 8mm; }
+          html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
           body * { visibility: hidden !important; }
           .print-radar, .print-radar * { visibility: visible !important; }
-          .print-radar { position: absolute; inset: 0; width: 100%; box-shadow: none !important; border: 2px solid #000 !important; padding: 8mm !important; }
           .no-print { display: none !important; }
+          .print-radar {
+            position: fixed !important;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 6mm !important;
+            box-shadow: none !important;
+            border: 2px solid #000 !important;
+            background: #fff !important;
+            overflow: hidden !important;
+            page-break-inside: avoid;
+          }
+          .print-radar .print-grid {
+            display: grid !important;
+            grid-template-columns: 1fr 95mm !important;
+            gap: 6mm !important;
+            align-items: start !important;
+          }
+          .print-radar .print-radar-chart { height: 150mm !important; }
+          .print-radar .print-legend { margin-top: 4mm !important; }
+          .print-radar .recharts-wrapper,
+          .print-radar .recharts-surface { overflow: visible !important; }
         }
       `}</style>
       <section className="flex flex-wrap items-end justify-between gap-4">
@@ -240,9 +263,9 @@ function EvaluationPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start print-grid">
               {/* Radar */}
-              <div className="h-[520px] w-full">
+              <div className="h-[520px] w-full print-radar-chart">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={radarData.data} outerRadius="78%">
                     <PolarGrid stroke="#000" strokeOpacity={0.35} />
@@ -339,7 +362,7 @@ function EvaluationPage() {
             </div>
 
             {/* Score legend (0–5 bands) */}
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-1 mt-5 text-[10px] font-mono">
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-1 mt-5 text-[10px] font-mono print-legend">
               {[
                 { n: 0, color: "#f44336", label: "Nebylo zahájeno" },
                 { n: 1, color: "#f44336", label: "Aktivita zahájena" },
