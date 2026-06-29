@@ -198,6 +198,7 @@ function PlannerPage() {
                           {d.assignments.map((a, i) => {
                             const key = `${a.date}-${i}`;
                             const isExpanded = expanded === key;
+                            const isCompleted = completedKeySet.has(`${a.date}|${a.zone}`);
                             const [zoneCode, zoneName] = a.zone.includes(" — ")
                               ? a.zone.split(" — ")
                               : [a.zone, ""];
@@ -205,7 +206,7 @@ function PlannerPage() {
                               <li
                                 key={i}
                                 onClick={() => setExpanded(isExpanded ? null : key)}
-                                className={`border-l-4 px-2 py-1.5 cursor-pointer transition-all ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"} ${isExpanded ? "py-3" : ""}`}
+                                className={`border-l-4 px-2 py-1.5 cursor-pointer transition-all ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"} ${isExpanded ? "py-3" : ""} ${isCompleted ? "ring-2 ring-emerald-500/60" : ""}`}
                                 title="Klikni pro zvětšení zóny"
                               >
                                 {isExpanded ? (
@@ -214,7 +215,14 @@ function PlannerPage() {
                                       <span className="font-display text-2xl tracking-wider text-ink leading-none">
                                         {zoneCode}
                                       </span>
-                                      <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                      <div className="flex items-center gap-1">
+                                        {isCompleted && (
+                                          <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider bg-emerald-500 text-white px-1.5 py-0.5">
+                                            <Check className="h-3 w-3" /> Auditován
+                                          </span>
+                                        )}
+                                        <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                      </div>
                                     </div>
                                     {zoneName && (
                                       <div className="text-sm font-medium text-ink leading-tight">
@@ -227,8 +235,15 @@ function PlannerPage() {
                                   </div>
                                 ) : (
                                   <>
-                                    <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground truncate">
-                                      {a.zone}
+                                    <div className="flex items-center justify-between gap-1">
+                                      <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground truncate">
+                                        {a.zone}
+                                      </div>
+                                      {isCompleted && (
+                                        <span className="inline-flex items-center justify-center rounded-full bg-emerald-500 text-white p-0.5" title="Audit uložen v archivu">
+                                          <Check className="h-3 w-3" />
+                                        </span>
+                                      )}
                                     </div>
                                     <div className="text-sm font-medium truncate">
                                       {a.auditor}
