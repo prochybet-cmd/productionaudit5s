@@ -157,10 +157,11 @@ function PlannerPage() {
               <div className="grid grid-cols-1 md:grid-cols-5">
                 {w.days.map((d) => {
                   const isToday = d.date === todayIso;
+                  const isHoliday = d.isHoliday;
                   return (
                     <div
                       key={d.date}
-                      className={`border-l border-border first:border-l-0 border-t md:border-t-0 p-3 min-h-[140px] ${isToday ? "bg-primary/20 border-l-4 border-r-4 border-y-4 border-primary relative" : ""}`}
+                      className={`border-l border-border first:border-l-0 border-t md:border-t-0 p-3 min-h-[140px] ${isToday ? "bg-primary/20 border-l-4 border-r-4 border-y-4 border-primary relative" : ""} ${isHoliday && !isToday ? "bg-muted/40" : ""}`}
                     >
                       <div className="flex items-baseline justify-between mb-2">
                         <div className="font-display text-lg flex items-center gap-2">
@@ -170,29 +171,42 @@ function PlannerPage() {
                               Dnes
                             </span>
                           )}
+                          {isHoliday && (
+                            <span className="font-mono text-[9px] uppercase tracking-wider bg-destructive text-destructive-foreground px-1.5 py-0.5">
+                              Svátek
+                            </span>
+                          )}
                         </div>
                         <div className="font-mono text-[11px] text-muted-foreground">
                           {formatDateCs(d.date)}
                         </div>
                       </div>
-                      <ul className="space-y-1.5">
-                        {d.assignments.map((a, i) => (
-                          <li
-                            key={i}
-                            className={`border-l-4 px-2 py-1.5 ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"}`}
-                          >
-                            <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground truncate">
-                              {a.zone}
-                            </div>
-                            <div className="text-sm font-medium truncate">
-                              {a.auditor}
-                            </div>
-                          </li>
-                        ))}
-                        {d.assignments.length === 0 && (
-                          <li className="text-xs text-muted-foreground italic">—</li>
-                        )}
-                      </ul>
+                      {isHoliday ? (
+                        <div className="hazard-stripe h-full min-h-[80px] flex items-center justify-center">
+                          <span className="bg-card px-2 py-1 font-mono text-[11px] uppercase tracking-wider text-ink border border-ink">
+                            {d.holidayName ?? "Státní svátek"} — nepracuje se
+                          </span>
+                        </div>
+                      ) : (
+                        <ul className="space-y-1.5">
+                          {d.assignments.map((a, i) => (
+                            <li
+                              key={i}
+                              className={`border-l-4 px-2 py-1.5 ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"}`}
+                            >
+                              <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground truncate">
+                                {a.zone}
+                              </div>
+                              <div className="text-sm font-medium truncate">
+                                {a.auditor}
+                              </div>
+                            </li>
+                          ))}
+                          {d.assignments.length === 0 && (
+                            <li className="text-xs text-muted-foreground italic">—</li>
+                          )}
+                        </ul>
+                      )}
                     </div>
                   );
                 })}
