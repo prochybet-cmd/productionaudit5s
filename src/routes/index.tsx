@@ -52,8 +52,9 @@ export const Route = createFileRoute("/")({
 function PlannerPage() {
   const today = new Date();
   const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-  const [year, setYear] = useState(today.getFullYear());
-  const [month, setMonth] = useState(today.getMonth()); // 0-based
+  // Plánujeme celý červenec 2026 (KW27 obsahuje 29.–30. 6. jako součást července).
+  const [year, setYear] = useState(2026);
+  const [month, setMonth] = useState(6); // 0-based → červenec
   const [zones, setZones] = useState<string[]>(DEFAULT_ZONES);
   const [auditors, setAuditors] = useState<string[]>(DEFAULT_AUDITORS);
 
