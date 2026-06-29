@@ -52,8 +52,9 @@ export const Route = createFileRoute("/")({
 function PlannerPage() {
   const today = new Date();
   const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-  const [year, setYear] = useState(today.getFullYear());
-  const [month, setMonth] = useState(today.getMonth()); // 0-based
+  // Plánujeme celý červenec 2026 (KW27 obsahuje 29.–30. 6. jako součást července).
+  const [year, setYear] = useState(2026);
+  const [month, setMonth] = useState(6); // 0-based → červenec
   const [zones, setZones] = useState<string[]>(DEFAULT_ZONES);
   const [auditors, setAuditors] = useState<string[]>(DEFAULT_AUDITORS);
 
@@ -73,11 +74,14 @@ function PlannerPage() {
   const zonesCovered = new Set(plan.assignments.map((a) => a.zone)).size;
 
   const currentWeek = plan.weeks.find((w) => w.days.some((d) => d.date === todayIso));
-  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
-  // Hide past weeks when viewing the current month — current week first, then upcoming.
-  const visibleWeeks = isCurrentMonth
+  const showTodayHighlight = Boolean(currentWeek);
+  // Skryj uplynulé týdny, pokud aktuální datum spadá do tohoto plánu.
+  const visibleWeeks = showTodayHighlight
     ? plan.weeks.filter((w) => w.end >= todayIso)
     : plan.weeks;
+
+  // Počítadlo provedených auditů = audity s datem před dneškem.
+  const completedAudits = plan.assignments.filter((a) => a.date < todayIso).length;
 
 
   return (
@@ -127,7 +131,7 @@ function PlannerPage() {
 
       {/* KPI strip */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiCard icon={CalendarCheck2} label="Auditů celkem" value={totalAudits} />
+        <KpiCard icon={CalendarCheck2} label="Provedených auditů" value={`${completedAudits}/${totalAudits}`} />
         <KpiCard icon={MapPin} label="Zón v plánu" value={`${zonesCovered}/${zones.length}`} />
         <KpiCard icon={Users} label="Auditorů nasazeno" value={`${auditorsUsed}/${auditors.length}`} />
         <KpiCard icon={CalendarCheck2} label="Pracovních týdnů" value={plan.weeks.length} />
@@ -136,7 +140,7 @@ function PlannerPage() {
       {/* Weekly plan */}
       <section className="space-y-6">
         {visibleWeeks.map((w) => {
-          const isCurrentWeek = isCurrentMonth && currentWeek?.weekNumber === w.weekNumber;
+          const isCurrentWeek = showTodayHighlight && currentWeek?.weekNumber === w.weekNumber;
           return (
             <div
               key={w.weekNumber}
