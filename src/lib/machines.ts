@@ -83,7 +83,7 @@ export const MACHINES: MachineRow[] = [
   // Z3 / L20 (PI510)
   { zone: "Z3", line: "L20", project: "730B", machine: "PI510" },
   // L12 — Dílna op.
-  { zone: "Z?", line: "L12", project: "různé", machine: "Dílna op." },
+  { zone: "Z2", line: "L12", project: "různé", machine: "Dílna op." },
   // Z2 / L5
   { zone: "Z2", line: "L5", project: "PPE/C", machine: "RF002" },
 ];
