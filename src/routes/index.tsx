@@ -208,7 +208,9 @@ function PlannerPage() {
                           {d.assignments.map((a, i) => {
                             const key = `${a.date}-${i}`;
                             const isExpanded = expanded === key;
-                            const isCompleted = completedKeySet.has(`${a.date}|${a.zone}`);
+                            const isCompleted = isAssignmentCompleted(w.weekNumber, a.zone);
+                            const weekEnded = todayIso > w.end;
+                            const isMissed = !isCompleted && weekEnded;
                             const [zoneCode, zoneName] = a.zone.includes(" — ")
                               ? a.zone.split(" — ")
                               : [a.zone, ""];
@@ -216,7 +218,7 @@ function PlannerPage() {
                               <li
                                 key={i}
                                 onClick={() => setExpanded(isExpanded ? null : key)}
-                                className={`border-l-4 px-2 py-1.5 cursor-pointer transition-all ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"} ${isExpanded ? "py-3" : ""} ${isCompleted ? "ring-2 ring-emerald-500/60" : ""}`}
+                                className={`border-l-4 px-2 py-1.5 cursor-pointer transition-all ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"} ${isExpanded ? "py-3" : ""} ${isCompleted ? "ring-2 ring-emerald-500/60" : ""} ${isMissed ? "ring-2 ring-red-500/60" : ""}`}
                                 title="Klikni pro zvětšení zóny"
                               >
                                 {isExpanded ? (
