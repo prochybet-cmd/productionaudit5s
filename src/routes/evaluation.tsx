@@ -177,11 +177,11 @@ function EvaluationPage() {
           }
           .print-radar .print-grid {
             display: grid !important;
-            grid-template-columns: 1fr 88mm !important;
-            gap: 5mm !important;
+            grid-template-columns: 1fr 70mm !important;
+            gap: 3mm !important;
             align-items: stretch !important;
           }
-          .print-radar .print-radar-chart { height: 165mm !important; width: 100% !important; }
+          .print-radar .print-radar-chart { height: 185mm !important; width: 100% !important; }
           .print-radar .print-legend { margin-top: 3mm !important; }
           .print-radar .recharts-wrapper,
           .print-radar .recharts-surface { overflow: visible !important; }
