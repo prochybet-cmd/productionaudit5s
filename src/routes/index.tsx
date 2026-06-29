@@ -131,61 +131,70 @@ function PlannerPage() {
 
       {/* Weekly plan */}
       <section className="space-y-6">
-        {plan.weeks.map((w) => (
-          <div key={w.weekNumber} className="stamp bg-card">
-            <div className="flex items-center justify-between bg-secondary text-secondary-foreground px-4 py-2">
-              <div className="font-display text-xl tracking-wider">
-                Týden {w.weekIndexInMonth}
-              </div>
-              <div className="font-mono text-xs uppercase tracking-wider text-primary">
-                KW {w.weekNumber} · {formatDateCs(w.start)} – {formatDateCs(w.end)} · {w.days.reduce((n, d) => n + d.assignments.length, 0)} auditů
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-5">
-              {w.days.map((d) => {
-                const isToday = d.date === todayIso;
-                return (
-                <div
-                  key={d.date}
-                  className={`border-l border-border first:border-l-0 border-t md:border-t-0 p-3 min-h-[140px] ${isToday ? "bg-primary/15 ring-2 ring-primary ring-inset relative" : ""}`}
-                >
-                  <div className="flex items-baseline justify-between mb-2">
-                    <div className="font-display text-lg flex items-center gap-2">
-                      {d.weekday}
-                      {isToday && (
-                        <span className="font-mono text-[9px] uppercase tracking-wider bg-ink text-primary px-1.5 py-0.5">
-                          Dnes
-                        </span>
-                      )}
-                    </div>
-                    <div className="font-mono text-[11px] text-muted-foreground">
-                      {formatDateCs(d.date)}
-                    </div>
-                  </div>
-                  <ul className="space-y-1.5">
-                    {d.assignments.map((a, i) => (
-                      <li
-                        key={i}
-                        className={`border-l-4 px-2 py-1.5 ${isToday ? "border-ink bg-primary/40" : "border-primary bg-accent/40"}`}
-                      >
-                        <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground truncate">
-                          {a.zone}
-                        </div>
-                        <div className="text-sm font-medium truncate">
-                          {a.auditor}
-                        </div>
-                      </li>
-                    ))}
-                    {d.assignments.length === 0 && (
-                      <li className="text-xs text-muted-foreground italic">—</li>
-                    )}
-                  </ul>
+        {plan.weeks.map((w) => {
+          const isCurrentWeek = isCurrentMonth && currentWeek?.weekNumber === w.weekNumber;
+          return (
+            <div
+              key={w.weekNumber}
+              className={`stamp bg-card overflow-hidden ${isCurrentWeek ? "ring-4 ring-primary" : ""}`}
+            >
+              <div className="flex items-center justify-between bg-secondary text-secondary-foreground px-4 py-2">
+                <div className="font-display text-xl tracking-wider">
+                  Týden {w.weekIndexInMonth}
                 </div>
-                );
-              })}
+                <div className="font-mono text-xs uppercase tracking-wider text-primary flex items-center gap-2">
+                  <span className={`px-2 py-0.5 ${isCurrentWeek ? "bg-primary text-ink" : ""}`}>
+                    KW {w.weekNumber}
+                  </span>
+                  <span>· {formatDateCs(w.start)} – {formatDateCs(w.end)} · {w.days.reduce((n, d) => n + d.assignments.length, 0)} auditů</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-5">
+                {w.days.map((d) => {
+                  const isToday = d.date === todayIso;
+                  return (
+                    <div
+                      key={d.date}
+                      className={`border-l border-border first:border-l-0 border-t md:border-t-0 p-3 min-h-[140px] ${isToday ? "bg-primary/20 border-l-4 border-r-4 border-y-4 border-primary relative" : ""}`}
+                    >
+                      <div className="flex items-baseline justify-between mb-2">
+                        <div className="font-display text-lg flex items-center gap-2">
+                          {d.weekday}
+                          {isToday && (
+                            <span className="font-mono text-[9px] uppercase tracking-wider bg-ink text-primary px-1.5 py-0.5">
+                              Dnes
+                            </span>
+                          )}
+                        </div>
+                        <div className="font-mono text-[11px] text-muted-foreground">
+                          {formatDateCs(d.date)}
+                        </div>
+                      </div>
+                      <ul className="space-y-1.5">
+                        {d.assignments.map((a, i) => (
+                          <li
+                            key={i}
+                            className={`border-l-4 px-2 py-1.5 ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"}`}
+                          >
+                            <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground truncate">
+                              {a.zone}
+                            </div>
+                            <div className="text-sm font-medium truncate">
+                              {a.auditor}
+                            </div>
+                          </li>
+                        ))}
+                        {d.assignments.length === 0 && (
+                          <li className="text-xs text-muted-foreground italic">—</li>
+                        )}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </section>
 
       <section className="border-2 border-ink bg-secondary text-secondary-foreground p-6 flex flex-wrap items-center justify-between gap-4">
