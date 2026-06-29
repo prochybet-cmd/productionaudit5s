@@ -138,6 +138,7 @@ function RootComponent() {
           Lean Manufacturing · IATF mindset · 5S
         </footer>
       </div>
+      <Toaster />
     </QueryClientProvider>
   );
 }
