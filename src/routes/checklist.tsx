@@ -44,10 +44,13 @@ function todayIso() {
 }
 
 function ChecklistPage() {
+  const navigate = useNavigate();
   const [zone, setZone] = useState<string>(DEFAULT_ZONES[0]);
   const [auditor, setAuditor] = useState<string>(DEFAULT_AUDITORS[0]);
   const [date, setDate] = useState<string>(todayIso());
+  const [overallNote, setOverallNote] = useState<string>("");
   const [notes, setNotes] = useState<Record<number, string>>({});
+  const [saving, setSaving] = useState(false);
   const [scores, setScores] = useState<Scores>(() => {
     const init: Scores = {};
     for (const cat of CHECKLIST) for (const it of cat.items) init[it.id] = null;
@@ -71,12 +74,54 @@ function ChecklistPage() {
   const filledCount = Object.values(scores).filter((v) => v !== null).length;
   const completion = Math.round((filledCount / (5 * 5)) * 100);
   const totalPct = Math.round((total / MAX_TOTAL) * 100);
+  const allFilled = filledCount === 25;
 
   const reset = () => {
     const init: Scores = {};
     for (const cat of CHECKLIST) for (const it of cat.items) init[it.id] = null;
     setScores(init);
     setNotes({});
+    setOverallNote("");
+  };
+
+  const saveToArchive = async () => {
+    if (!allFilled) {
+      toast.error("Vyplňte všech 25 položek před uložením.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const { data: audit, error: e1 } = await supabase
+        .from("audits")
+        .insert({
+          zone, auditor, audit_date: date,
+          total_score: total, max_score: MAX_TOTAL,
+          note: overallNote || null,
+        })
+        .select()
+        .single();
+      if (e1 || !audit) throw e1 ?? new Error("Insert failed");
+
+      const rows = CHECKLIST.flatMap((cat) =>
+        cat.items.map((it) => ({
+          audit_id: audit.id,
+          item_id: it.id,
+          category: cat.key,
+          score: scores[it.id] ?? 0,
+          note: notes[it.id] || null,
+        })),
+      );
+      const { error: e2 } = await supabase.from("audit_scores").insert(rows);
+      if (e2) throw e2;
+
+      toast.success("Audit byl uložen do archivu.");
+      navigate({ to: "/archive" });
+    } catch (err) {
+      console.error(err);
+      toast.error("Uložení selhalo. Zkuste to znovu.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
