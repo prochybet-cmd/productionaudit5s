@@ -42,8 +42,8 @@ function PlannerPage() {
   // Plánujeme celý červenec 2026 (KW27 obsahuje 29.–30. 6. jako součást července).
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(6); // 0-based → červenec
-  const [zones, setZones] = useState<string[]>(DEFAULT_ZONES);
-  const { all: allAuditors, active: auditors, save: saveAuditors } = useAuditorsStore();
+  const { active: zones } = useZonesStore();
+  const { active: auditors } = useAuditorsStore();
 
   const plan = useMemo(
     () => generatePlan({ year, month, zones, auditors }),
