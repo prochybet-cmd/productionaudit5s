@@ -35,6 +35,23 @@ function zoneToGroup(zoneName: string): string | null {
   return null;
 }
 
+const CZECH_MONTHS = [
+  "LEDEN", "ÚNOR", "BŘEZEN", "DUBEN", "KVĚTEN", "ČERVEN",
+  "ČERVENEC", "SRPEN", "ZÁŘÍ", "ŘÍJEN", "LISTOPAD", "PROSINEC",
+];
+
+function formatPeriodLabel(monthFilter: string): string {
+  if (!monthFilter) return "VŠECHNA OBDOBÍ";
+  const [year, month] = monthFilter.split("-");
+  const name = CZECH_MONTHS[Number(month) - 1] ?? monthFilter;
+  return `${name} ${year}`;
+}
+
+function formatZoneLabel(zoneFilter: string): string {
+  if (!zoneFilter) return "VŠECHNY ZÓNY";
+  return `ZÓNA ${zoneFilter.replace(/^Z/, "")}`;
+}
+
 export const Route = createFileRoute("/evaluation")({
   head: () => ({
     meta: [
