@@ -257,8 +257,13 @@ function PlannerPage() {
                                         {a.zone}
                                       </div>
                                       {isCompleted && (
-                                        <span className="inline-flex items-center justify-center rounded-full bg-emerald-500 text-white p-0.5" title="Audit uložen v archivu">
+                                        <span className="inline-flex items-center justify-center rounded-full bg-emerald-500 text-white p-0.5" title="Audit uložen v archivu (stejný týden)">
                                           <Check className="h-3 w-3" />
+                                        </span>
+                                      )}
+                                      {isMissed && (
+                                        <span className="inline-flex items-center justify-center rounded-full bg-red-600 text-white p-0.5" title="Audit neproveden v daném týdnu">
+                                          <X className="h-3 w-3" />
                                         </span>
                                       )}
                                     </div>
