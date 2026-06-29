@@ -88,7 +88,7 @@ export const CHECKLIST: ChecklistCategory[] = [
   },
 ];
 
-export const SCORE_OPTIONS = [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+export const SCORE_OPTIONS = [0, 1, 2, 3, 4, 5];
 export const MAX_TOTAL = 25 * 5; // 125
 
 export function scoreLabel(score: number | null): string {
