@@ -49,7 +49,7 @@ function ZonesPage() {
           Pokrytí zón
         </div>
         <h1 className="font-display text-5xl mt-1">
-          Zóny · {MONTH_NAMES_CS[month]} {year}
+          Zóny · stroje
         </h1>
         <p className="text-sm text-muted-foreground mt-2">
           Kolik auditů a od koho proběhne v každé zóně tento měsíc.
