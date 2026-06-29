@@ -103,20 +103,22 @@ function EvaluationPage() {
   }, [filtered]);
 
 
-  // Detailed breakdown per category (for side panel)
+  // Per-checklist breakdown: max = 25 b/sekce, 125 b celkem;
+  // "Získané" = průměrné skóre na jeden audit v dané kategorii (0–25).
   const breakdown = useMemo(() => {
     if (!filtered) return [];
+    const auditCount = filtered.audits.length;
     return CATEGORIES.map((c) => {
-      const auditCount = filtered.audits.length;
-      const itemsPerCat = c.max / 5; // count of items in category
-      const maxScore = auditCount * c.max;
+      const maxScore = c.max; // 25 b per sekce (5 položek × 5)
       const scoresInCat = filtered.scores.filter((s) => s.category === c.key);
-      const gained = scoresInCat.reduce((acc, s) => acc + s.score, 0);
-      const avg = scoresInCat.length > 0 ? gained / scoresInCat.length : 0;
+      const totalGained = scoresInCat.reduce((acc, s) => acc + s.score, 0);
+      const gained = auditCount > 0 ? Number((totalGained / auditCount).toFixed(1)) : 0;
+      const avg = scoresInCat.length > 0 ? totalGained / scoresInCat.length : 0; // 0–5 na položku
       const pct = maxScore > 0 ? Math.round((gained / maxScore) * 100) : 0;
-      return { cs: c.cs, itemsPerCat, maxScore, gained, avg, pct };
+      return { cs: c.cs, maxScore, gained, avg, pct };
     });
   }, [filtered]);
+
 
   const trendData = useMemo(() => {
     if (!filtered) return [];
@@ -248,19 +250,28 @@ function EvaluationPage() {
                       dataKey="category"
                       tick={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700, fill: "#000" }}
                     />
-                    <PolarRadiusAxis
-                      angle={90}
-                      domain={[0, 5]}
-                      tickCount={6}
-                      tick={{ fontSize: 10, fill: "#000" }}
-                      stroke="#000"
-                    />
                     {/* Background colored bands: outermost first so inner colors overlay */}
                     <Radar dataKey="band5" stroke="#000" strokeOpacity={0.4} fill="#2196f3" fillOpacity={1} isAnimationActive={false} legendType="none" />
                     <Radar dataKey="band4" stroke="#000" strokeOpacity={0.4} fill="#8bc34a" fillOpacity={1} isAnimationActive={false} legendType="none" />
                     <Radar dataKey="band3" stroke="#000" strokeOpacity={0.4} fill="#ffeb3b" fillOpacity={1} isAnimationActive={false} legendType="none" />
                     <Radar dataKey="band2" stroke="#000" strokeOpacity={0.4} fill="#ff9800" fillOpacity={1} isAnimationActive={false} legendType="none" />
                     <Radar dataKey="band1" stroke="#000" strokeOpacity={0.4} fill="#f44336" fillOpacity={1} isAnimationActive={false} legendType="none" />
+                    {/* 0–5 scale ticks rendered after bands so labels stay visible */}
+                    <PolarRadiusAxis
+                      angle={90}
+                      domain={[0, 5]}
+                      tickCount={6}
+                      stroke="#000"
+                      tick={(props: { x: number; y: number; payload: { value: number } }) => (
+                        <g>
+                          <rect x={props.x - 8} y={props.y - 7} width={16} height={14} fill="#fff" stroke="#000" strokeWidth={1} />
+                          <text x={props.x} y={props.y} dy={4} textAnchor="middle" fontSize={11} fontWeight={700} fill="#000">
+                            {props.payload.value}
+                          </text>
+                        </g>
+                      )}
+                    />
+
                     {/* Real data on top */}
                     {radarData.series.map((key, i) => (
                       <Radar
