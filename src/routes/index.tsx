@@ -120,34 +120,6 @@ function PlannerPage() {
         </div>
       </section>
 
-      {/* Today highlight */}
-      {todaysAudits.length > 0 && (
-        <section className="border-2 border-ink bg-primary text-ink p-5 shadow-[6px_6px_0_0_#000]">
-          <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
-            <div>
-              <div className="font-mono text-[11px] uppercase tracking-[0.3em]">
-                Dnes · {today.toLocaleDateString("cs-CZ", { weekday: "long" })}
-              </div>
-              <div className="font-display text-3xl tracking-wider">
-                {formatDateCs(todayIso)} — {todaysAudits.length} {todaysAudits.length === 1 ? "audit" : todaysAudits.length < 5 ? "audity" : "auditů"}
-              </div>
-            </div>
-            <div className="font-mono text-xs uppercase">Kdo · kde</div>
-          </div>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {todaysAudits.map((a, i) => (
-              <li key={i} className="bg-ink text-primary px-3 py-2 border-2 border-ink">
-                <div className="font-mono text-[10px] uppercase tracking-wider opacity-80">
-                  {a.zone}
-                </div>
-                <div className="font-display text-lg tracking-wider truncate">
-                  {a.auditor}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
 
       {/* KPI strip */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
