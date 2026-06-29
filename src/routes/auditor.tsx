@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search, MapPin, CalendarDays, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, MapPin, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
