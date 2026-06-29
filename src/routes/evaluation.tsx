@@ -250,19 +250,28 @@ function EvaluationPage() {
                       dataKey="category"
                       tick={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700, fill: "#000" }}
                     />
-                    <PolarRadiusAxis
-                      angle={90}
-                      domain={[0, 5]}
-                      tickCount={6}
-                      tick={{ fontSize: 10, fill: "#000" }}
-                      stroke="#000"
-                    />
                     {/* Background colored bands: outermost first so inner colors overlay */}
                     <Radar dataKey="band5" stroke="#000" strokeOpacity={0.4} fill="#2196f3" fillOpacity={1} isAnimationActive={false} legendType="none" />
                     <Radar dataKey="band4" stroke="#000" strokeOpacity={0.4} fill="#8bc34a" fillOpacity={1} isAnimationActive={false} legendType="none" />
                     <Radar dataKey="band3" stroke="#000" strokeOpacity={0.4} fill="#ffeb3b" fillOpacity={1} isAnimationActive={false} legendType="none" />
                     <Radar dataKey="band2" stroke="#000" strokeOpacity={0.4} fill="#ff9800" fillOpacity={1} isAnimationActive={false} legendType="none" />
                     <Radar dataKey="band1" stroke="#000" strokeOpacity={0.4} fill="#f44336" fillOpacity={1} isAnimationActive={false} legendType="none" />
+                    {/* 0–5 scale ticks rendered after bands so labels stay visible */}
+                    <PolarRadiusAxis
+                      angle={90}
+                      domain={[0, 5]}
+                      tickCount={6}
+                      stroke="#000"
+                      tick={(props: { x: number; y: number; payload: { value: number } }) => (
+                        <g>
+                          <rect x={props.x - 8} y={props.y - 7} width={16} height={14} fill="#fff" stroke="#000" strokeWidth={1} />
+                          <text x={props.x} y={props.y} dy={4} textAnchor="middle" fontSize={11} fontWeight={700} fill="#000">
+                            {props.payload.value}
+                          </text>
+                        </g>
+                      )}
+                    />
+
                     {/* Real data on top */}
                     {radarData.series.map((key, i) => (
                       <Radar
