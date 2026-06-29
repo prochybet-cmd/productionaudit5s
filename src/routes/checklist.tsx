@@ -144,8 +144,16 @@ function ChecklistPage() {
           <Button variant="outline" onClick={reset} className="gap-2">
             <RotateCcw className="h-4 w-4" /> Vyčistit
           </Button>
-          <Button onClick={() => window.print()} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button variant="outline" onClick={() => window.print()} className="gap-2">
             <Printer className="h-4 w-4" /> Tisk / PDF
+          </Button>
+          <Button
+            onClick={saveToArchive}
+            disabled={saving || !allFilled}
+            className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            Uložit do archivu
           </Button>
         </div>
       </section>
