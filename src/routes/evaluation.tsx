@@ -10,7 +10,29 @@ import {
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { CHECKLIST } from "@/lib/checklist";
-import { DEFAULT_AUDITORS, DEFAULT_ZONES } from "@/lib/scheduler";
+import { DEFAULT_AUDITORS } from "@/lib/scheduler";
+
+// Mapping of Z-groups (reporting zones) to underlying L-zones (audit zones)
+const Z_GROUPS: Record<string, string[]> = {
+  Z1A: ["L9", "L10"],
+  Z1B: ["L7", "L8"],
+  Z2: ["L1", "L2", "L3", "L4"],
+  Z3: ["L5", "L6", "L11", "L12"],
+};
+const Z_GROUP_KEYS = Object.keys(Z_GROUPS);
+// Map L-zone -> Z-group. Zone names in DB start with "L1 — ...", "L9 — ..." etc.
+function lZoneCode(zoneName: string): string | null {
+  const m = zoneName.match(/^(L\d{1,2})/);
+  return m ? m[1] : null;
+}
+function zoneToGroup(zoneName: string): string | null {
+  const code = lZoneCode(zoneName);
+  if (!code) return null;
+  for (const [g, list] of Object.entries(Z_GROUPS)) {
+    if (list.includes(code)) return g;
+  }
+  return null;
+}
 
 export const Route = createFileRoute("/evaluation")({
   head: () => ({
