@@ -54,7 +54,7 @@ function EvaluationPage() {
   const [zoneFilter, setZoneFilter] = useState<string>("");
   const [auditorFilter, setAuditorFilter] = useState<string>("");
   const [monthFilter, setMonthFilter] = useState<string>("");
-  const [groupBy, setGroupBy] = useState<GroupBy>("zone");
+  
 
   const { data, isLoading } = useQuery({
     queryKey: ["evaluation"],
@@ -80,45 +80,28 @@ function EvaluationPage() {
     return { audits, scores };
   }, [data, zoneFilter, auditorFilter, monthFilter]);
 
-  // Group audits by zone/auditor/month and compute % per category for radar
+  // Single aggregated series — always one black line driven by current filters
   const radarData = useMemo(() => {
     if (!filtered) return { series: [] as string[], data: [] };
-    const auditMap = new Map(filtered.audits.map((a) => [a.id, a]));
-    const groups = new Map<string, { sumByCat: Record<string, number>; countByCat: Record<string, number> }>();
-
+    const sumByCat: Record<string, number> = {};
+    const cntByCat: Record<string, number> = {};
     for (const s of filtered.scores) {
-      const a = auditMap.get(s.audit_id);
-      if (!a) continue;
-      const key =
-        groupBy === "zone" ? (zoneToGroup(a.zone) ?? "—") :
-        groupBy === "auditor" ? a.auditor :
-        a.audit_date.slice(0, 7);
-      if (!groups.has(key)) {
-        groups.set(key, { sumByCat: {}, countByCat: {} });
-      }
-      const g = groups.get(key)!;
-      g.sumByCat[s.category] = (g.sumByCat[s.category] ?? 0) + s.score;
-      g.countByCat[s.category] = (g.countByCat[s.category] ?? 0) + 1;
+      sumByCat[s.category] = (sumByCat[s.category] ?? 0) + s.score;
+      cntByCat[s.category] = (cntByCat[s.category] ?? 0) + 1;
     }
-
-    const series = Array.from(groups.keys()).sort();
+    const SERIES_KEY = "Celkem";
     const chartData = CATEGORIES.map((c) => {
-      const row: Record<string, string | number> = {
+      const sum = sumByCat[c.key] ?? 0;
+      const cnt = cntByCat[c.key] ?? 0;
+      return {
         category: c.cs,
-        // background concentric bands (drawn outermost → innermost)
         band5: 5, band4: 4, band3: 3, band2: 2, band1: 1,
+        [SERIES_KEY]: cnt > 0 ? Number((sum / cnt).toFixed(2)) : 0,
       };
-      for (const key of series) {
-        const g = groups.get(key)!;
-        const sum = g.sumByCat[c.key] ?? 0;
-        const cnt = g.countByCat[c.key] ?? 0;
-        // průměrné skóre na položku (0–5)
-        row[key] = cnt > 0 ? Number((sum / cnt).toFixed(2)) : 0;
-      }
-      return row;
     });
-    return { series, data: chartData };
-  }, [filtered, groupBy]);
+    return { series: [SERIES_KEY], data: chartData };
+  }, [filtered]);
+
 
   // Detailed breakdown per category (for side panel)
   const breakdown = useMemo(() => {
@@ -191,7 +174,7 @@ function EvaluationPage() {
       </section>
 
       {/* Filters */}
-      <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000] grid grid-cols-1 md:grid-cols-4 gap-4">
+      <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000] grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
         <div className="space-y-1.5">
           <Label className="font-mono text-[10px] uppercase tracking-[0.2em] flex items-center gap-1">
             <Filter className="h-3 w-3" /> Zóna (Z)
@@ -215,14 +198,6 @@ function EvaluationPage() {
           <select value={monthFilter} onChange={(e) => setMonthFilter(e.target.value)} className="w-full border-2 border-input bg-background px-3 py-2 font-mono text-sm">
             <option value="">Všechny měsíce</option>
             {months.map((m) => <option key={m} value={m}>{m}</option>)}
-          </select>
-        </div>
-        <div className="space-y-1.5">
-          <Label className="font-mono text-[10px] uppercase tracking-[0.2em]">Porovnat dle</Label>
-          <select value={groupBy} onChange={(e) => setGroupBy(e.target.value as GroupBy)} className="w-full border-2 border-input bg-background px-3 py-2 font-mono text-sm">
-            <option value="zone">Zóny</option>
-            <option value="auditor">Auditora</option>
-            <option value="month">Měsíce</option>
           </select>
         </div>
       </section>
@@ -259,7 +234,7 @@ function EvaluationPage() {
                 Pavučinový graf 5S
               </div>
               <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                {groupBy === "zone" ? "podle zón (Z)" : groupBy === "auditor" ? "podle auditorů" : "podle měsíců"} · škála 0–5
+                celkové průměrné skóre · škála 0–5
               </div>
             </div>
 
