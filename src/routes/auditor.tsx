@@ -101,58 +101,24 @@ function AuditorPage() {
           Jméno auditora
         </label>
         <div className="mt-2 flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              autoFocus
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setConfirmed(null);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && suggestions[0]) {
-                  setConfirmed(suggestions[0]);
-                  setQuery(suggestions[0]);
-                }
-              }}
-              placeholder="např. Jan Novák"
-              className="pl-9 h-12 text-base border-2"
-            />
-          </div>
-          <Button
-            disabled={suggestions.length === 0}
-            onClick={() => {
-              const pick = suggestions[0];
-              if (pick) {
-                setConfirmed(pick);
-                setQuery(pick);
-              }
+          <Select
+            value={confirmed ?? ""}
+            onValueChange={(value) => {
+              setConfirmed(value);
             }}
-            className="h-12 bg-primary text-primary-foreground hover:bg-primary/90 font-mono uppercase tracking-wider"
           >
-            Potvrdit
-          </Button>
+            <SelectTrigger className="h-12 flex-1 border-2 text-base">
+              <SelectValue placeholder="Vyber auditora" />
+            </SelectTrigger>
+            <SelectContent>
+              {DEFAULT_AUDITORS.map((name) => (
+                <SelectItem key={name} value={name}>
+                  {name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-
-        {suggestions.length > 0 && !confirmed && (
-          <ul className="mt-3 border border-border divide-y divide-border bg-background">
-            {suggestions.map((n) => (
-              <li key={n}>
-                <button
-                  onClick={() => {
-                    setConfirmed(n);
-                    setQuery(n);
-                  }}
-                  className="w-full text-left px-3 py-2 hover:bg-accent flex items-center justify-between group"
-                >
-                  <span>{n}</span>
-                  <ArrowRight className="h-4 w-4 opacity-0 group-hover:opacity-100" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
 
       {confirmed && (
