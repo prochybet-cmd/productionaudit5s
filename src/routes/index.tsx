@@ -74,6 +74,10 @@ function PlannerPage() {
 
   const currentWeek = plan.weeks.find((w) => w.days.some((d) => d.date === todayIso));
   const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+  // Hide past weeks when viewing the current month — current week first, then upcoming.
+  const visibleWeeks = isCurrentMonth
+    ? plan.weeks.filter((w) => w.end >= todayIso)
+    : plan.weeks;
 
 
   return (
@@ -131,7 +135,7 @@ function PlannerPage() {
 
       {/* Weekly plan */}
       <section className="space-y-6">
-        {plan.weeks.map((w) => {
+        {visibleWeeks.map((w) => {
           const isCurrentWeek = isCurrentMonth && currentWeek?.weekNumber === w.weekNumber;
           return (
             <div

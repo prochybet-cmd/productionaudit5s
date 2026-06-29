@@ -76,14 +76,37 @@ function isoWeek(d: Date): number {
   return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
 }
 
+function mondayOf(d: Date): Date {
+  const out = new Date(d);
+  const wd = out.getDay(); // 0=Sun..6=Sat
+  const delta = (wd + 6) % 7; // days since Monday
+  out.setDate(out.getDate() - delta);
+  out.setHours(0, 0, 0, 0);
+  return out;
+}
+
 function workdaysOfMonth(year: number, month: number): Date[] {
-  // month is 0-based
+  // Return Mon–Fri for every ISO week that overlaps `month` (0-based).
+  // A week is included if any of its 7 days falls within the month,
+  // and ALL five workdays are returned (even if they spill into prev/next month).
   const out: Date[] = [];
-  const d = new Date(year, month, 1);
-  while (d.getMonth() === month) {
-    const wd = d.getDay();
-    if (wd >= 1 && wd <= 5) out.push(new Date(d));
-    d.setDate(d.getDate() + 1);
+  const seen = new Set<string>();
+  const first = new Date(year, month, 1);
+  const last = new Date(year, month + 1, 0);
+  // Walk every calendar day of the month, snap to its Monday, add Mon–Fri.
+  const cursor = new Date(first);
+  while (cursor <= last) {
+    const monday = mondayOf(cursor);
+    const key = fmtDate(monday);
+    if (!seen.has(key)) {
+      seen.add(key);
+      for (let i = 0; i < 5; i++) {
+        const day = new Date(monday);
+        day.setDate(monday.getDate() + i);
+        out.push(day);
+      }
+    }
+    cursor.setDate(cursor.getDate() + 1);
   }
   return out;
 }
