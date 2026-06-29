@@ -45,7 +45,8 @@ function PlannerPage() {
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(6); // 0-based → červenec
   const { active: zones } = useZonesStore();
-  const { active: auditors } = useAuditorsStore();
+  const { all: allAuditors, active: auditors } = useAuditorsStore();
+
   const [expanded, setExpanded] = useState<string | null>(null);
 
 
@@ -116,7 +117,7 @@ function PlannerPage() {
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KpiCard icon={CalendarCheck2} label="Provedených auditů" value={`${completedAudits}/${totalAudits}`} />
         <KpiCard icon={MapPin} label="Zón v plánu" value={`${zonesCovered}/${zones.length}`} />
-        <KpiCard icon={Users} label="Auditorů nasazeno" value={`${auditorsUsed}/${auditors.length}`} />
+        <KpiCard icon={Users} label="Auditorů nasazeno" value={`${auditorsUsed}/${allAuditors.length}`} />
         <KpiCard icon={CalendarCheck2} label="Pracovních týdnů" value={plan.weeks.length} />
       </section>
 
