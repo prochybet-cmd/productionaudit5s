@@ -1,12 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search, MapPin, CalendarDays, ArrowRight } from "lucide-react";
+import { Search, MapPin, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   DEFAULT_AUDITORS,
-  DEFAULT_ZONES,
   MONTH_NAMES_CS,
   formatDateCs,
   generatePlan,
@@ -35,6 +34,12 @@ function AuditorPage() {
   const [query, setQuery] = useState("");
   const [confirmed, setConfirmed] = useState<string | null>(null);
 
+  const goto = (delta: number) => {
+    const d = new Date(year, month + delta, 1);
+    setYear(d.getFullYear());
+    setMonth(d.getMonth());
+  };
+
   const plan = useMemo(
     () => generatePlan({ year, month }),
     [year, month],
@@ -53,15 +58,35 @@ function AuditorPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10 space-y-8">
-      <div>
-        <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-          Auditor lookup
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+            Auditor lookup
+          </div>
+          <h1 className="font-display text-5xl text-ink mt-1">Kam mám jít?</h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            Zadej své jméno a potvrď. Uvidíš všechny své 5S audity v měsíci{" "}
+            <strong>{MONTH_NAMES_CS[month]} {year}</strong>.
+          </p>
         </div>
-        <h1 className="font-display text-5xl text-ink mt-1">Kam mám jít?</h1>
-        <p className="text-sm text-muted-foreground mt-2">
-          Zadej své jméno a potvrď. Uvidíš všechny své 5S audity v měsíci{" "}
-          <strong>{MONTH_NAMES_CS[month]} {year}</strong>.
-        </p>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" onClick={() => goto(-1)}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setYear(today.getFullYear());
+              setMonth(today.getMonth());
+            }}
+            className="font-mono uppercase"
+          >
+            Dnes
+          </Button>
+          <Button variant="outline" size="icon" onClick={() => goto(1)}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <div className="border-2 border-ink bg-card p-6 shadow-[6px_6px_0_0_#000]">
