@@ -285,15 +285,17 @@ function ChecklistPage() {
                       <div className="flex flex-wrap gap-1">
                         {SCORE_OPTIONS.map((opt) => {
                           const active = v === opt;
+                          const legend = SCORE_LEGEND.find((s) => s.value === opt)!;
                           return (
                             <button
                               key={opt}
                               type="button"
                               onClick={() => setScores((s) => ({ ...s, [it.id]: opt }))}
+                              title={`${opt} — ${legend.label}: ${legend.desc}`}
                               className={`min-w-[2.25rem] h-9 px-2 font-mono text-xs border-2 border-ink transition-colors ${active ? "bg-primary text-primary-foreground shadow-[2px_2px_0_0_#000]" : "bg-card hover:bg-accent/40"}`}
-                              aria-label={`Skóre ${opt}`}
+                              aria-label={`Skóre ${opt} — ${legend.label}`}
                             >
-                              {opt.toString().replace(".", ",")}
+                              {opt}
                             </button>
                           );
                         })}
