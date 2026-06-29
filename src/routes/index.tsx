@@ -23,12 +23,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  DEFAULT_AUDITORS,
   DEFAULT_ZONES,
   MONTH_NAMES_CS,
   formatDateCs,
   generatePlan,
 } from "@/lib/scheduler";
+import { useAuditorsStore } from "@/lib/auditors-store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -56,7 +56,7 @@ function PlannerPage() {
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(6); // 0-based → červenec
   const [zones, setZones] = useState<string[]>(DEFAULT_ZONES);
-  const [auditors, setAuditors] = useState<string[]>(DEFAULT_AUDITORS);
+  const { all: allAuditors, active: auditors, save: saveAuditors } = useAuditorsStore();
 
   const plan = useMemo(
     () => generatePlan({ year, month, zones, auditors }),
@@ -119,10 +119,10 @@ function PlannerPage() {
           </Button>
           <ConfigDialog
             zones={zones}
-            auditors={auditors}
+            auditors={allAuditors}
             onSave={(z, a) => {
               setZones(z);
-              setAuditors(a);
+              saveAuditors({ all: a, active: a.filter((n) => auditors.includes(n) || !allAuditors.includes(n)) });
             }}
           />
         </div>
