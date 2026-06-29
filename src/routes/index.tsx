@@ -23,12 +23,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  DEFAULT_AUDITORS,
   DEFAULT_ZONES,
   MONTH_NAMES_CS,
   formatDateCs,
   generatePlan,
 } from "@/lib/scheduler";
+import { useAuditorsStore } from "@/lib/auditors-store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
