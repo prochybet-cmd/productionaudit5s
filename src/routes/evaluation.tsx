@@ -362,7 +362,7 @@ function EvaluationPage() {
             </div>
 
             {/* Score legend (0–5 bands) */}
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-1 mt-5 text-[10px] font-mono">
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-1 mt-5 text-[10px] font-mono print-legend">
               {[
                 { n: 0, color: "#f44336", label: "Nebylo zahájeno" },
                 { n: 1, color: "#f44336", label: "Aktivita zahájena" },
