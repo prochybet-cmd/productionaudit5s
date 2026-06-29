@@ -14,6 +14,7 @@ import { Route as ChecklistRouteImport } from './routes/checklist'
 import { Route as AuditorRouteImport } from './routes/auditor'
 import { Route as ArchiveRouteImport } from './routes/archive'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ArchiveIdRouteImport } from './routes/archive.$id'
 
 const ZonesRoute = ZonesRouteImport.update({
   id: '/zones',
@@ -40,40 +41,61 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArchiveIdRoute = ArchiveIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ArchiveRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/archive': typeof ArchiveRoute
+  '/archive': typeof ArchiveRouteWithChildren
   '/auditor': typeof AuditorRoute
   '/checklist': typeof ChecklistRoute
   '/zones': typeof ZonesRoute
+  '/archive/$id': typeof ArchiveIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/archive': typeof ArchiveRoute
+  '/archive': typeof ArchiveRouteWithChildren
   '/auditor': typeof AuditorRoute
   '/checklist': typeof ChecklistRoute
   '/zones': typeof ZonesRoute
+  '/archive/$id': typeof ArchiveIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/archive': typeof ArchiveRoute
+  '/archive': typeof ArchiveRouteWithChildren
   '/auditor': typeof AuditorRoute
   '/checklist': typeof ChecklistRoute
   '/zones': typeof ZonesRoute
+  '/archive/$id': typeof ArchiveIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/archive' | '/auditor' | '/checklist' | '/zones'
+  fullPaths:
+    | '/'
+    | '/archive'
+    | '/auditor'
+    | '/checklist'
+    | '/zones'
+    | '/archive/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/archive' | '/auditor' | '/checklist' | '/zones'
-  id: '__root__' | '/' | '/archive' | '/auditor' | '/checklist' | '/zones'
+  to: '/' | '/archive' | '/auditor' | '/checklist' | '/zones' | '/archive/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/archive'
+    | '/auditor'
+    | '/checklist'
+    | '/zones'
+    | '/archive/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ArchiveRoute: typeof ArchiveRoute
+  ArchiveRoute: typeof ArchiveRouteWithChildren
   AuditorRoute: typeof AuditorRoute
   ChecklistRoute: typeof ChecklistRoute
   ZonesRoute: typeof ZonesRoute
@@ -116,12 +138,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/archive/$id': {
+      id: '/archive/$id'
+      path: '/$id'
+      fullPath: '/archive/$id'
+      preLoaderRoute: typeof ArchiveIdRouteImport
+      parentRoute: typeof ArchiveRoute
+    }
   }
 }
 
+interface ArchiveRouteChildren {
+  ArchiveIdRoute: typeof ArchiveIdRoute
+}
+
+const ArchiveRouteChildren: ArchiveRouteChildren = {
+  ArchiveIdRoute: ArchiveIdRoute,
+}
+
+const ArchiveRouteWithChildren =
+  ArchiveRoute._addFileChildren(ArchiveRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ArchiveRoute: ArchiveRoute,
+  ArchiveRoute: ArchiveRouteWithChildren,
   AuditorRoute: AuditorRoute,
   ChecklistRoute: ChecklistRoute,
   ZonesRoute: ZonesRoute,
