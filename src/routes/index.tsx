@@ -104,14 +104,6 @@ function PlannerPage() {
           <Button variant="outline" size="icon" onClick={() => goto(1)}>
             <ChevronRight className="h-4 w-4" />
           </Button>
-          <ConfigDialog
-            zones={zones}
-            auditors={allAuditors}
-            onSave={(z, a) => {
-              setZones(z);
-              saveAuditors({ all: a, active: a.filter((n) => auditors.includes(n) || !allAuditors.includes(n)) });
-            }}
-          />
         </div>
       </section>
 
