@@ -239,14 +239,15 @@ export function generatePlan(input: PlanInput): MonthlyPlan {
       auditorHistory[aIdx].add(zones[zIdx]);
     }
 
-    // Distribute assignments evenly across this week's workdays (Mon–Fri)
-    const dayCount = dates.length || 1;
-    const buckets: number[][] = dates.map(() => []);
+    // Distribute assignments evenly across this week's workdays (Mon–Pá), holidays skipped.
+    const workDates = dates.filter((d) => !HOLIDAYS[fmtDate(d)]);
+    const dayCount = workDates.length || 1;
+    const buckets: number[][] = workDates.map(() => []);
     for (let i = 0; i < count; i++) {
       buckets[i % dayCount].push(i);
     }
 
-    dates.forEach((date, di) => {
+    workDates.forEach((date, di) => {
       for (const slot of buckets[di]) {
         assignments.push({
           date: fmtDate(date),
@@ -262,13 +263,17 @@ export function generatePlan(input: PlanInput): MonthlyPlan {
 
   // Build week → day groupings
   const weeks: WeekBucket[] = orderedWeeks.map(([weekNo, dates], wIdx) => {
-    const dayBuckets: DayBucket[] = dates.map((d) => ({
-      date: fmtDate(d),
-      weekday: WEEKDAY_SHORT[d.getDay()],
-      assignments: assignments.filter(
-        (a) => a.date === fmtDate(d),
-      ),
-    }));
+    const dayBuckets: DayBucket[] = dates.map((d) => {
+      const iso = fmtDate(d);
+      const holidayName = HOLIDAYS[iso];
+      return {
+        date: iso,
+        weekday: WEEKDAY_SHORT[d.getDay()],
+        isHoliday: Boolean(holidayName),
+        holidayName,
+        assignments: assignments.filter((a) => a.date === iso),
+      };
+    });
     return {
       weekNumber: weekNo,
       weekIndexInMonth: wIdx + 1,
