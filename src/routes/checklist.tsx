@@ -77,6 +77,15 @@ function ChecklistPage() {
   const totalPct = Math.round((total / MAX_TOTAL) * 100);
   const allFilled = filledCount === 25;
 
+  const printTemplate = () => {
+    const w = window.open("/checklist-template.pdf", "_blank");
+    if (w) {
+      w.addEventListener("load", () => {
+        try { w.focus(); w.print(); } catch { /* noop */ }
+      });
+    }
+  };
+
   const reset = () => {
     const init: Scores = {};
     for (const cat of CHECKLIST) for (const it of cat.items) init[it.id] = null;
