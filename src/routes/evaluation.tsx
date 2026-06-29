@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { CHECKLIST } from "@/lib/checklist";
+import { CHECKLIST, SCORE_LEGEND } from "@/lib/checklist";
 import { DEFAULT_AUDITORS } from "@/lib/scheduler";
 
 // Mapping of Z-groups (reporting zones) to underlying L-zones (audit zones)
@@ -48,7 +48,13 @@ export const Route = createFileRoute("/evaluation")({
 const CATEGORIES = CHECKLIST.map((c) => ({ key: c.key, code: c.code, cs: c.cs, max: c.items.length * 5 }));
 const RADAR_COLORS = ["hsl(48 98% 52%)", "hsl(28 95% 55%)", "hsl(200 80% 50%)", "hsl(340 75% 55%)", "hsl(150 60% 45%)", "hsl(270 70% 60%)"];
 
-type GroupBy = "zone" | "auditor" | "month";
+// Extract hex colors from the shared checklist SCORE_LEGEND so the evaluation page uses the same scale as the checklist.
+const SCORE_COLORS = SCORE_LEGEND.map((s) => {
+  const m = s.bg.match(/#([0-9a-fA-F]{6})/);
+  return m ? m[0] : "#999";
+});
+
+
 
 function EvaluationPage() {
   const [zoneFilter, setZoneFilter] = useState<string>("");
@@ -273,12 +279,12 @@ function EvaluationPage() {
                       dataKey="category"
                       tick={{ fontSize: 13, fontFamily: "monospace", fontWeight: 700, fill: "#000" }}
                     />
-                    {/* Background colored bands: outermost first so inner colors overlay */}
-                    <Radar dataKey="band5" stroke="#000" strokeOpacity={0.4} fill="#2196f3" fillOpacity={1} isAnimationActive={false} legendType="none" />
-                    <Radar dataKey="band4" stroke="#000" strokeOpacity={0.4} fill="#8bc34a" fillOpacity={1} isAnimationActive={false} legendType="none" />
-                    <Radar dataKey="band3" stroke="#000" strokeOpacity={0.4} fill="#ffeb3b" fillOpacity={1} isAnimationActive={false} legendType="none" />
-                    <Radar dataKey="band2" stroke="#000" strokeOpacity={0.4} fill="#ff9800" fillOpacity={1} isAnimationActive={false} legendType="none" />
-                    <Radar dataKey="band1" stroke="#000" strokeOpacity={0.4} fill="#f44336" fillOpacity={1} isAnimationActive={false} legendType="none" />
+                    {/* Background colored bands using the same scale as the checklist */}
+                    <Radar dataKey="band5" stroke="#000" strokeOpacity={0.4} fill={SCORE_COLORS[4]} fillOpacity={1} isAnimationActive={false} legendType="none" />
+                    <Radar dataKey="band4" stroke="#000" strokeOpacity={0.4} fill={SCORE_COLORS[3]} fillOpacity={1} isAnimationActive={false} legendType="none" />
+                    <Radar dataKey="band3" stroke="#000" strokeOpacity={0.4} fill={SCORE_COLORS[2]} fillOpacity={1} isAnimationActive={false} legendType="none" />
+                    <Radar dataKey="band2" stroke="#000" strokeOpacity={0.4} fill={SCORE_COLORS[1]} fillOpacity={1} isAnimationActive={false} legendType="none" />
+                    <Radar dataKey="band1" stroke="#000" strokeOpacity={0.4} fill={SCORE_COLORS[0]} fillOpacity={1} isAnimationActive={false} legendType="none" />
                     {/* 0–5 scale ticks rendered after bands so labels stay visible */}
                     <PolarRadiusAxis
                       angle={90}
@@ -361,19 +367,12 @@ function EvaluationPage() {
               </div>
             </div>
 
-            {/* Score legend (0–5 bands) */}
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-1 mt-5 text-[10px] font-mono print-legend">
-              {[
-                { n: 0, color: "#f44336", label: "Nebylo zahájeno" },
-                { n: 1, color: "#f44336", label: "Aktivita zahájena" },
-                { n: 2, color: "#ff9800", label: "Rozšířená aktivita" },
-                { n: 3, color: "#ffeb3b", label: "Min. přijatelná úroveň" },
-                { n: 4, color: "#8bc34a", label: "Best in class" },
-                { n: 5, color: "#2196f3", label: "Best Practice / World Class" },
-              ].map((l) => (
-                <div key={l.n} className="border-2 border-ink p-1.5 text-center" style={{ background: l.color }}>
-                  <div className="text-base font-bold leading-tight">{l.n}</div>
-                  <div className="leading-tight">{l.label}</div>
+            {/* Score legend (0–5) — same scale as the checklist */}
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-0 mt-5 text-[10px] font-mono print-legend border-2 border-ink">
+              {SCORE_LEGEND.map((s, i) => (
+                <div key={s.value} className={`${s.bg} ${s.fg} p-3 text-center ${i > 0 ? "border-l-2 border-ink" : ""}`}>
+                  <div className="font-display text-3xl leading-none">{s.value}</div>
+                  <div className="font-bold uppercase tracking-wider mt-1 opacity-90">{s.label}</div>
                 </div>
               ))}
             </div>
