@@ -45,7 +45,6 @@ export const Route = createFileRoute("/")({
 function PlannerPage() {
   const today = new Date();
   const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-  // Plánujeme celý červenec 2026 (KW27 obsahuje 29.–30. 6. jako součást července).
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(6); // 0-based → červenec
   const { active: zones } = useZonesStore();
@@ -53,11 +52,31 @@ function PlannerPage() {
 
   const [expanded, setExpanded] = useState<string | null>(null);
 
-
   const plan = useMemo(
     () => generatePlan({ year, month, zones, auditors }),
     [year, month, zones, auditors],
   );
+
+  const { data: completedAudits } = useQuery({
+    queryKey: ["audits-for-plan", year, month],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("audits")
+        .select("zone, audit_date")
+        .gte("audit_date", `${year}-${String(month + 1).padStart(2, "0")}-01`)
+        .lt("audit_date", `${month === 11 ? year + 1 : year}-${String(month === 11 ? 1 : month + 2).padStart(2, "0")}-01`);
+      if (error) throw error;
+      return data as { zone: string; audit_date: string }[];
+    },
+  });
+
+  const completedKeySet = useMemo(() => {
+    const set = new Set<string>();
+    for (const a of completedAudits ?? []) {
+      set.add(`${a.audit_date}|${a.zone}`);
+    }
+    return set;
+  }, [completedAudits]);
 
   const goto = (delta: number) => {
     const d = new Date(year, month + delta, 1);
@@ -71,13 +90,12 @@ function PlannerPage() {
 
   const currentWeek = plan.weeks.find((w) => w.days.some((d) => d.date === todayIso));
   const showTodayHighlight = Boolean(currentWeek);
-  // Skryj uplynulé týdny, pokud aktuální datum spadá do tohoto plánu.
   const visibleWeeks = showTodayHighlight
     ? plan.weeks.filter((w) => w.end >= todayIso)
     : plan.weeks;
 
-  // Počítadlo provedených auditů = audity s datem před dneškem.
   const completedAudits = plan.assignments.filter((a) => a.date < todayIso).length;
+
 
 
   return (
