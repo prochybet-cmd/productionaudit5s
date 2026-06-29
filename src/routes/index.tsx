@@ -71,13 +71,19 @@ function PlannerPage() {
     },
   });
 
-  const completedKeySet = useMemo(() => {
-    const set = new Set<string>();
+  // Map weekNumber -> Set of zones audited in that week (any day Mon-Sun)
+  const completedByWeek = useMemo(() => {
+    const map = new Map<number, Set<string>>();
+    for (const w of plan.weeks) map.set(w.weekNumber, new Set());
     for (const a of completedAudits ?? []) {
-      set.add(`${a.audit_date}|${a.zone}`);
+      const w = plan.weeks.find((wk) => a.audit_date >= wk.start && a.audit_date <= wk.end);
+      if (w) map.get(w.weekNumber)!.add(a.zone);
     }
-    return set;
-  }, [completedAudits]);
+    return map;
+  }, [completedAudits, plan.weeks]);
+
+  const isAssignmentCompleted = (weekNumber: number, zone: string) =>
+    completedByWeek.get(weekNumber)?.has(zone) ?? false;
 
   const goto = (delta: number) => {
     const d = new Date(year, month + delta, 1);
@@ -95,7 +101,10 @@ function PlannerPage() {
     ? plan.weeks.filter((w) => w.end >= todayIso)
     : plan.weeks;
 
-  const completedCount = plan.assignments.filter((a) => a.date < todayIso).length;
+  const completedCount = plan.assignments.filter((a) => {
+    const w = plan.weeks.find((wk) => a.date >= wk.start && a.date <= wk.end);
+    return w ? isAssignmentCompleted(w.weekNumber, a.zone) : false;
+  }).length;
 
 
 
