@@ -1,12 +1,14 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { CalendarRange, UserSearch, ClipboardList, ClipboardCheck } from "lucide-react";
+import { CalendarRange, UserSearch, ClipboardList, ClipboardCheck, Archive, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const nav = [
-  { to: "/", label: "Měsíční plán", icon: CalendarRange },
-  { to: "/auditor", label: "Najít auditora", icon: UserSearch },
+  { to: "/", label: "Plán", icon: CalendarRange },
+  { to: "/auditor", label: "Auditor", icon: UserSearch },
   { to: "/zones", label: "Zóny", icon: ClipboardList },
   { to: "/checklist", label: "Checklist", icon: ClipboardCheck },
+  { to: "/archive", label: "Archiv", icon: Archive },
+  { to: "/evaluation", label: "Vyhodnocení", icon: BarChart3 },
 ] as const;
 
 export function SiteHeader() {
