@@ -89,7 +89,7 @@ function ChecklistPage() {
             5S Checklist
           </h1>
           <p className="text-sm text-muted-foreground mt-2 max-w-2xl">
-            25 kontrolních položek v 5 kategoriích. Stupnice 0–5 (s krokem 0,5).
+            25 kontrolních položek v 5 kategoriích. Stupnice 0–5 (celá čísla).
             Vyplňte záhlaví, ohodnoťte každou otázku a uložte / vytiskněte.
           </p>
         </div>
