@@ -6,10 +6,10 @@ const nav = [
   { to: "/", label: "Plán", icon: CalendarRange },
   { to: "/checklist", label: "Checklist", icon: ClipboardCheck },
   { to: "/data-entry", label: "Zápis dat", icon: FileSpreadsheet },
-  { to: "/archive", label: "Archiv", icon: Archive },
   { to: "/evaluation", label: "Vyhodnocení", icon: BarChart3 },
   { to: "/auditor", label: "Auditor", icon: UserSearch },
   { to: "/zones", label: "Zóny", icon: ClipboardList },
+  { to: "/archive", label: "Archiv", icon: Archive },
 ] as const;
 
 export function SiteHeader() {
