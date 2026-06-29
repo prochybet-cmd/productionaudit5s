@@ -1,10 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ClipboardCheck, Printer, RotateCcw, CheckCircle2 } from "lucide-react";
+import { ClipboardCheck, Printer, RotateCcw, CheckCircle2, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 import {
   CHECKLIST,
   MAX_TOTAL,
@@ -12,6 +13,7 @@ import {
   scoreLabel,
 } from "@/lib/checklist";
 import { DEFAULT_AUDITORS, DEFAULT_ZONES } from "@/lib/scheduler";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/checklist")({
   head: () => ({
