@@ -103,25 +103,30 @@ function mondayOf(d: Date): Date {
 }
 
 function workdaysOfMonth(year: number, month: number): Date[] {
-  // Return Mon–Fri for every ISO week that overlaps `month` (0-based).
-  // A week is included if any of its 7 days falls within the month,
-  // and ALL five workdays are returned (even if they spill into prev/next month).
+  // Return Mon–Fri for every ISO week that has AT LEAST ONE workday (Mon–Fri)
+  // within `month` (0-based). All five workdays of such a week are returned,
+  // even if some spill into the previous/next month.
   const out: Date[] = [];
   const seen = new Set<string>();
   const first = new Date(year, month, 1);
   const last = new Date(year, month + 1, 0);
-  // Walk every calendar day of the month, snap to its Monday, add Mon–Fri.
   const cursor = new Date(first);
   while (cursor <= last) {
     const monday = mondayOf(cursor);
     const key = fmtDate(monday);
     if (!seen.has(key)) {
       seen.add(key);
+      const weekDays: Date[] = [];
+      let hasWorkdayInMonth = false;
       for (let i = 0; i < 5; i++) {
         const day = new Date(monday);
         day.setDate(monday.getDate() + i);
-        out.push(day);
+        weekDays.push(day);
+        if (day.getFullYear() === year && day.getMonth() === month) {
+          hasWorkdayInMonth = true;
+        }
       }
+      if (hasWorkdayInMonth) out.push(...weekDays);
     }
     cursor.setDate(cursor.getDate() + 1);
   }
