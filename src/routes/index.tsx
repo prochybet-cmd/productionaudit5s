@@ -8,6 +8,7 @@ import {
   CalendarCheck2,
   Maximize2,
   Check,
+  X,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
