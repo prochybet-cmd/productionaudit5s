@@ -218,7 +218,7 @@ function PlannerPage() {
                               <li
                                 key={i}
                                 onClick={() => setExpanded(isExpanded ? null : key)}
-                                className={`border-l-4 px-2 py-1.5 cursor-pointer transition-all ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"} ${isExpanded ? "py-3" : ""} ${isCompleted ? "ring-2 ring-emerald-500/60" : ""} ${isMissed ? "ring-2 ring-red-500/60" : ""}`}
+                                className={`border-l-4 px-2 py-1.5 cursor-pointer transition-all ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"} ${isExpanded ? "py-3" : ""}`}
                                 title="Klikni pro zvětšení zóny"
                               >
                                 {isExpanded ? (
