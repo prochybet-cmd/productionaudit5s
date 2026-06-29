@@ -6,6 +6,7 @@ import {
   Users,
   MapPin,
   CalendarCheck2,
+  Maximize2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import {
 } from "@/lib/scheduler";
 import { useAuditorsStore } from "@/lib/auditors-store";
 import { useZonesStore } from "@/lib/zones-store";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -44,6 +46,8 @@ function PlannerPage() {
   const [month, setMonth] = useState(6); // 0-based → červenec
   const { active: zones } = useZonesStore();
   const { active: auditors } = useAuditorsStore();
+  const [expanded, setExpanded] = useState<string | null>(null);
+
 
   const plan = useMemo(
     () => generatePlan({ year, month, zones, auditors }),
@@ -168,19 +172,49 @@ function PlannerPage() {
                         </div>
                       ) : (
                         <ul className="space-y-1.5">
-                          {d.assignments.map((a, i) => (
-                            <li
-                              key={i}
-                              className={`border-l-4 px-2 py-1.5 ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"}`}
-                            >
-                              <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground truncate">
-                                {a.zone}
-                              </div>
-                              <div className="text-sm font-medium truncate">
-                                {a.auditor}
-                              </div>
-                            </li>
-                          ))}
+                          {d.assignments.map((a, i) => {
+                            const key = `${a.date}-${i}`;
+                            const isExpanded = expanded === key;
+                            const [zoneCode, zoneName] = a.zone.includes(" — ")
+                              ? a.zone.split(" — ")
+                              : [a.zone, ""];
+                            return (
+                              <li
+                                key={i}
+                                onClick={() => setExpanded(isExpanded ? null : key)}
+                                className={`border-l-4 px-2 py-1.5 cursor-pointer transition-all ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"} ${isExpanded ? "py-3" : ""}`}
+                                title="Klikni pro zvětšení zóny"
+                              >
+                                {isExpanded ? (
+                                  <div className="space-y-0.5">
+                                    <div className="flex items-center justify-between">
+                                      <span className="font-display text-2xl tracking-wider text-ink leading-none">
+                                        {zoneCode}
+                                      </span>
+                                      <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                    </div>
+                                    {zoneName && (
+                                      <div className="text-sm font-medium text-ink leading-tight">
+                                        {zoneName}
+                                      </div>
+                                    )}
+                                    <div className="text-xs font-medium text-muted-foreground pt-1">
+                                      {a.auditor}
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground truncate">
+                                      {a.zone}
+                                    </div>
+                                    <div className="text-sm font-medium truncate">
+                                      {a.auditor}
+                                    </div>
+                                  </>
+                                )}
+                              </li>
+                            );
+                          })}
                           {d.assignments.length === 0 && (
                             <li className="text-xs text-muted-foreground italic">—</li>
                           )}
