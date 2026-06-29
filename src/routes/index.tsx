@@ -74,11 +74,14 @@ function PlannerPage() {
   const zonesCovered = new Set(plan.assignments.map((a) => a.zone)).size;
 
   const currentWeek = plan.weeks.find((w) => w.days.some((d) => d.date === todayIso));
-  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
-  // Hide past weeks when viewing the current month — current week first, then upcoming.
-  const visibleWeeks = isCurrentMonth
+  const showTodayHighlight = Boolean(currentWeek);
+  // Skryj uplynulé týdny, pokud aktuální datum spadá do tohoto plánu.
+  const visibleWeeks = showTodayHighlight
     ? plan.weeks.filter((w) => w.end >= todayIso)
     : plan.weeks;
+
+  // Počítadlo provedených auditů = audity s datem před dneškem.
+  const completedAudits = plan.assignments.filter((a) => a.date < todayIso).length;
 
 
   return (
