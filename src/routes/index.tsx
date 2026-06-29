@@ -51,6 +51,7 @@ export const Route = createFileRoute("/")({
 
 function PlannerPage() {
   const today = new Date();
+  const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth()); // 0-based
   const [zones, setZones] = useState<string[]>(DEFAULT_ZONES);
@@ -70,6 +71,7 @@ function PlannerPage() {
   const totalAudits = plan.assignments.length;
   const auditorsUsed = new Set(plan.assignments.map((a) => a.auditor)).size;
   const zonesCovered = new Set(plan.assignments.map((a) => a.zone)).size;
+  const todaysAudits = plan.assignments.filter((a) => a.date === todayIso);
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8 space-y-8">
@@ -115,6 +117,35 @@ function PlannerPage() {
         </div>
       </section>
 
+      {/* Today highlight */}
+      {todaysAudits.length > 0 && (
+        <section className="border-2 border-ink bg-primary text-ink p-5 shadow-[6px_6px_0_0_#000]">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+            <div>
+              <div className="font-mono text-[11px] uppercase tracking-[0.3em]">
+                Dnes · {today.toLocaleDateString("cs-CZ", { weekday: "long" })}
+              </div>
+              <div className="font-display text-3xl tracking-wider">
+                {formatDateCs(todayIso)} — {todaysAudits.length} {todaysAudits.length === 1 ? "audit" : todaysAudits.length < 5 ? "audity" : "auditů"}
+              </div>
+            </div>
+            <div className="font-mono text-xs uppercase">Kdo · kde</div>
+          </div>
+          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {todaysAudits.map((a, i) => (
+              <li key={i} className="bg-ink text-primary px-3 py-2 border-2 border-ink">
+                <div className="font-mono text-[10px] uppercase tracking-wider opacity-80">
+                  {a.zone}
+                </div>
+                <div className="font-display text-lg tracking-wider truncate">
+                  {a.auditor}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {/* KPI strip */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KpiCard icon={CalendarCheck2} label="Auditů celkem" value={totalAudits} />
@@ -136,13 +167,22 @@ function PlannerPage() {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-5">
-              {w.days.map((d) => (
+              {w.days.map((d) => {
+                const isToday = d.date === todayIso;
+                return (
                 <div
                   key={d.date}
-                  className="border-l border-border first:border-l-0 border-t md:border-t-0 p-3 min-h-[140px]"
+                  className={`border-l border-border first:border-l-0 border-t md:border-t-0 p-3 min-h-[140px] ${isToday ? "bg-primary/15 ring-2 ring-primary ring-inset relative" : ""}`}
                 >
                   <div className="flex items-baseline justify-between mb-2">
-                    <div className="font-display text-lg">{d.weekday}</div>
+                    <div className="font-display text-lg flex items-center gap-2">
+                      {d.weekday}
+                      {isToday && (
+                        <span className="font-mono text-[9px] uppercase tracking-wider bg-ink text-primary px-1.5 py-0.5">
+                          Dnes
+                        </span>
+                      )}
+                    </div>
                     <div className="font-mono text-[11px] text-muted-foreground">
                       {formatDateCs(d.date)}
                     </div>
@@ -151,7 +191,7 @@ function PlannerPage() {
                     {d.assignments.map((a, i) => (
                       <li
                         key={i}
-                        className="border-l-4 border-primary bg-accent/40 px-2 py-1.5"
+                        className={`border-l-4 px-2 py-1.5 ${isToday ? "border-ink bg-primary/40" : "border-primary bg-accent/40"}`}
                       >
                         <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground truncate">
                           {a.zone}
@@ -166,7 +206,8 @@ function PlannerPage() {
                     )}
                   </ul>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         ))}
