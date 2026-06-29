@@ -323,6 +323,24 @@ function ChecklistPage() {
         />
       </section>
 
+      {/* Bottom action bar — duplicate of top actions, so user doesn't need to scroll up */}
+      <section className="flex flex-wrap items-center justify-end gap-2 print:hidden">
+        <Button variant="outline" onClick={reset} className="gap-2">
+          <RotateCcw className="h-4 w-4" /> Vyčistit
+        </Button>
+        <Button variant="outline" onClick={() => window.print()} className="gap-2">
+          <Printer className="h-4 w-4" /> Tisk / PDF
+        </Button>
+        <Button
+          onClick={saveToArchive}
+          disabled={saving || !allFilled}
+          className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          Uložit do archivu
+        </Button>
+      </section>
+
       <section className="border-2 border-ink bg-secondary text-secondary-foreground p-5 flex flex-wrap items-center justify-between gap-4 print:hidden">
         <div>
           <div className="font-display text-xl tracking-wider">Podpisy</div>
