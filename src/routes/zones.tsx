@@ -1,14 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { MapPin, CalendarDays, Factory, Cog } from "lucide-react";
+import { MapPin, CalendarDays, Factory, Cog, Settings2, Plus, Trash2 } from "lucide-react";
 import {
-  DEFAULT_ZONES,
   MONTH_NAMES_CS,
   formatDateCs,
   generatePlan,
 } from "@/lib/scheduler";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { MACHINES, Z_GROUP_ORDER, LINE_ORDER, groupMachines } from "@/lib/machines";
+import { useZonesStore } from "@/lib/zones-store";
 
 export const Route = createFileRoute("/zones")({
   head: () => ({
@@ -17,10 +20,10 @@ export const Route = createFileRoute("/zones")({
       {
         name: "description",
         content:
-          "Přehled všech 12 výrobních zón s plánovanými 5S audity v aktuálním měsíci.",
+          "Přehled všech výrobních zón a strojů, plánované 5S audity a správa seznamu zón.",
       },
       { property: "og:title", content: "Přehled zón — 5S audity" },
-      { property: "og:description", content: "Pokrytí výrobních zón v měsíčním plánu." },
+      { property: "og:description", content: "Stroje a pokrytí výrobních zón." },
     ],
   }),
   component: ZonesPage,
@@ -30,17 +33,21 @@ function ZonesPage() {
   const today = new Date();
   const [year] = useState(today.getFullYear());
   const [month] = useState(today.getMonth());
-  const plan = useMemo(() => generatePlan({ year, month }), [year, month]);
+  const { active: zones } = useZonesStore();
+  const plan = useMemo(
+    () => generatePlan({ year, month, zones }),
+    [year, month, zones],
+  );
 
   const byZone = useMemo(() => {
     const map = new Map<string, typeof plan.assignments>();
-    for (const z of DEFAULT_ZONES) map.set(z, []);
+    for (const z of zones) map.set(z, []);
     for (const a of plan.assignments) {
       if (!map.has(a.zone)) map.set(a.zone, []);
       map.get(a.zone)!.push(a);
     }
     return map;
-  }, [plan]);
+  }, [plan, zones]);
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10 space-y-8">
@@ -52,12 +59,18 @@ function ZonesPage() {
           Zóny · stroje
         </h1>
         <p className="text-sm text-muted-foreground mt-2">
-          Kolik auditů a od koho proběhne v každé zóně tento měsíc.
+          Stroje podle zón, plán auditů pro {MONTH_NAMES_CS[month]} {year} a správa seznamu zón.
         </p>
       </div>
 
-      <Tabs defaultValue="plan" className="w-full">
+      <Tabs defaultValue="stroje" className="w-full">
         <TabsList className="bg-card border-2 border-ink rounded-none p-0 h-auto">
+          <TabsTrigger
+            value="stroje"
+            className="rounded-none border-r-2 border-ink px-5 py-2 font-mono text-xs uppercase tracking-wider data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+          >
+            <Factory className="h-4 w-4 mr-2" /> Stroje
+          </TabsTrigger>
           <TabsTrigger
             value="plan"
             className="rounded-none border-r-2 border-ink px-5 py-2 font-mono text-xs uppercase tracking-wider data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
@@ -65,12 +78,16 @@ function ZonesPage() {
             <CalendarDays className="h-4 w-4 mr-2" /> Plán auditů
           </TabsTrigger>
           <TabsTrigger
-            value="stroje"
+            value="nastaveni"
             className="rounded-none px-5 py-2 font-mono text-xs uppercase tracking-wider data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
-            <Factory className="h-4 w-4 mr-2" /> Stroje
+            <Settings2 className="h-4 w-4 mr-2" /> Nastavení
           </TabsTrigger>
         </TabsList>
+
+        <TabsContent value="stroje" className="mt-6">
+          <MachinesByZone />
+        </TabsContent>
 
         <TabsContent value="plan" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -107,11 +124,97 @@ function ZonesPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="stroje" className="mt-6">
-          <MachinesByZone />
+        <TabsContent value="nastaveni" className="mt-6">
+          <ZonesSettings />
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+function ZonesSettings() {
+  const { all, active, save } = useZonesStore();
+  const [newZone, setNewZone] = useState("");
+
+  const toggle = (name: string, checked: boolean) => {
+    const next = checked
+      ? [...active, name].filter((n, i, arr) => arr.indexOf(n) === i)
+      : active.filter((n) => n !== name);
+    save({ all, active: next });
+  };
+
+  const addZone = () => {
+    const name = newZone.trim();
+    if (!name || all.includes(name)) return;
+    save({ all: [...all, name], active: [...active, name] });
+    setNewZone("");
+  };
+
+  const removeZone = (name: string) => {
+    save({ all: all.filter((n) => n !== name), active: active.filter((n) => n !== name) });
+  };
+
+  return (
+    <section className="border-2 border-ink bg-card p-6 shadow-[6px_6px_0_0_#000] space-y-4 max-w-3xl">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Settings2 className="h-4 w-4" />
+          <h2 className="font-display text-2xl tracking-wider">Správa zón</h2>
+        </div>
+        <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+          {active.length}/{all.length} aktivních
+        </div>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Odškrtni zónu — dočasně se vyjme z plánování. Tlačítkem koše ji úplně smažeš.
+        Změny se ihned promítnou do karty <strong>Plán</strong>.
+      </p>
+
+      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {all.map((name) => {
+          const checked = active.includes(name);
+          return (
+            <li
+              key={name}
+              className={`flex items-center justify-between gap-2 border-2 px-3 py-2 ${checked ? "border-ink bg-background" : "border-dashed border-muted-foreground/40 bg-muted/30 opacity-70"}`}
+            >
+              <label className="flex items-center gap-2 flex-1 cursor-pointer">
+                <Checkbox
+                  checked={checked}
+                  onCheckedChange={(v) => toggle(name, Boolean(v))}
+                />
+                <span className="font-mono text-sm">{name}</span>
+              </label>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                onClick={() => removeZone(name)}
+                title="Smazat zónu"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </li>
+          );
+        })}
+      </ul>
+
+      <div className="flex gap-2 pt-2 border-t-2 border-dashed border-border">
+        <Input
+          placeholder='Nová zóna, např. "L 13 - nová linka"'
+          value={newZone}
+          onChange={(e) => setNewZone(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") addZone();
+          }}
+          className="border-2 font-mono"
+        />
+        <Button onClick={addZone} className="bg-primary text-primary-foreground hover:bg-primary/90 gap-1">
+          <Plus className="h-4 w-4" />
+          Přidat
+        </Button>
+      </div>
+    </section>
   );
 }
 
