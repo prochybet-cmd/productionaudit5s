@@ -89,6 +89,24 @@ export const CHECKLIST: ChecklistCategory[] = [
 ];
 
 export const SCORE_OPTIONS = [0, 1, 2, 3, 4, 5];
+
+export interface ScoreLegendEntry {
+  value: number;
+  label: string;
+  desc: string;
+  bg: string;
+  fg: string;
+}
+
+export const SCORE_LEGEND: ScoreLegendEntry[] = [
+  { value: 0, label: "Nebylo zahájeno", desc: "Standard nezaveden", bg: "bg-[#d93025]", fg: "text-white" },
+  { value: 1, label: "Činnost zahájena", desc: "6 a více nálezů k otázce", bg: "bg-[#f29900]", fg: "text-ink" },
+  { value: 2, label: "Rozsáhlá aktivita", desc: "4–5 nálezů k otázce", bg: "bg-[#fbe24a]", fg: "text-ink" },
+  { value: 3, label: "Přijatelná úroveň", desc: "2–3 nálezy k otázce", bg: "bg-[#9fc55a]", fg: "text-ink" },
+  { value: 4, label: "Velmi dobrý výsledek", desc: "1 nález k otázce", bg: "bg-[#3aa757]", fg: "text-white" },
+  { value: 5, label: "Best Practice / World Class", desc: "Bez nálezů", bg: "bg-[#2a9fd6]", fg: "text-white" },
+];
+
 export const MAX_TOTAL = 25 * 5; // 125
 
 export function scoreLabel(score: number | null): string {

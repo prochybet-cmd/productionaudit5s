@@ -10,6 +10,7 @@ import {
   CHECKLIST,
   MAX_TOTAL,
   SCORE_OPTIONS,
+  SCORE_LEGEND,
   scoreLabel,
 } from "@/lib/checklist";
 import { DEFAULT_AUDITORS, DEFAULT_ZONES } from "@/lib/scheduler";
@@ -221,6 +222,25 @@ function ChecklistPage() {
         </div>
       </section>
 
+      {/* Score legend */}
+      <section className="border-2 border-ink bg-card shadow-[3px_3px_0_0_#000] overflow-hidden">
+        <header className="bg-ink text-primary px-5 py-2 font-mono text-[10px] uppercase tracking-[0.3em]">
+          Hodnotící stupnice — kdy volit které skóre
+        </header>
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-0 border-t-2 border-ink">
+          {SCORE_LEGEND.map((s, i) => (
+            <div
+              key={s.value}
+              className={`p-3 ${s.bg} ${s.fg} ${i > 0 ? "border-l-2 border-ink" : ""} flex flex-col`}
+            >
+              <div className="font-display text-3xl leading-none">{s.value}</div>
+              <div className="font-mono text-[10px] uppercase tracking-wider mt-1 opacity-90">{s.label}</div>
+              <div className="text-[11px] leading-tight mt-1">{s.desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Categories */}
       {CHECKLIST.map((cat) => {
         const sub = subtotals.find((s) => s.key === cat.key)!;
@@ -266,15 +286,17 @@ function ChecklistPage() {
                       <div className="flex flex-wrap gap-1">
                         {SCORE_OPTIONS.map((opt) => {
                           const active = v === opt;
+                          const legend = SCORE_LEGEND.find((s) => s.value === opt)!;
                           return (
                             <button
                               key={opt}
                               type="button"
                               onClick={() => setScores((s) => ({ ...s, [it.id]: opt }))}
+                              title={`${opt} — ${legend.label}: ${legend.desc}`}
                               className={`min-w-[2.25rem] h-9 px-2 font-mono text-xs border-2 border-ink transition-colors ${active ? "bg-primary text-primary-foreground shadow-[2px_2px_0_0_#000]" : "bg-card hover:bg-accent/40"}`}
-                              aria-label={`Skóre ${opt}`}
+                              aria-label={`Skóre ${opt} — ${legend.label}`}
                             >
-                              {opt.toString().replace(".", ",")}
+                              {opt}
                             </button>
                           );
                         })}
