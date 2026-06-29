@@ -263,9 +263,9 @@ function EvaluationPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start print-grid">
               {/* Radar */}
-              <div className="h-[520px] w-full">
+              <div className="h-[520px] w-full print-radar-chart">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadarChart data={radarData.data} outerRadius="78%">
                     <PolarGrid stroke="#000" strokeOpacity={0.35} />
