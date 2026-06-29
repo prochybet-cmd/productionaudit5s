@@ -6,29 +6,16 @@ import {
   Users,
   MapPin,
   CalendarCheck2,
-  Settings2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  DEFAULT_ZONES,
   MONTH_NAMES_CS,
   formatDateCs,
   generatePlan,
 } from "@/lib/scheduler";
 import { useAuditorsStore } from "@/lib/auditors-store";
+import { useZonesStore } from "@/lib/zones-store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
