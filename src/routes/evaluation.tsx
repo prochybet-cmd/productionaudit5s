@@ -159,11 +159,13 @@ function EvaluationPage() {
       <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000] grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="space-y-1.5">
           <Label className="font-mono text-[10px] uppercase tracking-[0.2em] flex items-center gap-1">
-            <Filter className="h-3 w-3" /> Zóna
+            <Filter className="h-3 w-3" /> Zóna (Z)
           </Label>
           <select value={zoneFilter} onChange={(e) => setZoneFilter(e.target.value)} className="w-full border-2 border-input bg-background px-3 py-2 font-mono text-sm">
             <option value="">Všechny zóny</option>
-            {DEFAULT_ZONES.map((z) => <option key={z} value={z}>{z}</option>)}
+            {Z_GROUP_KEYS.map((z) => (
+              <option key={z} value={z}>{z} ({Z_GROUPS[z].join(", ")})</option>
+            ))}
           </select>
         </div>
         <div className="space-y-1.5">
