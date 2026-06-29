@@ -6,6 +6,7 @@ import {
   Users,
   MapPin,
   CalendarCheck2,
+  Maximize2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import {
 } from "@/lib/scheduler";
 import { useAuditorsStore } from "@/lib/auditors-store";
 import { useZonesStore } from "@/lib/zones-store";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
