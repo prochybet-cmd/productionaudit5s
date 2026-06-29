@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   DEFAULT_AUDITORS,
-  DEFAULT_ZONES,
   MONTH_NAMES_CS,
   formatDateCs,
   generatePlan,
