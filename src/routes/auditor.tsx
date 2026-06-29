@@ -148,7 +148,7 @@ function AuditorPage() {
                         {a.date.split("-")[2]}
                       </div>
                       <div className="font-mono text-[10px]">
-                        {MONTH_NAMES_CS[Number(a.date.split("-")[1]) - 1].slice(0, 3)}
+                        {MONTH_SHORT_NAMES_CS[Number(a.date.split("-")[1]) - 1]}
                       </div>
                     </div>
                     <div>
