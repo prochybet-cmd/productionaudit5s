@@ -35,6 +35,23 @@ function zoneToGroup(zoneName: string): string | null {
   return null;
 }
 
+const CZECH_MONTHS = [
+  "LEDEN", "ÚNOR", "BŘEZEN", "DUBEN", "KVĚTEN", "ČERVEN",
+  "ČERVENEC", "SRPEN", "ZÁŘÍ", "ŘÍJEN", "LISTOPAD", "PROSINEC",
+];
+
+function formatPeriodLabel(monthFilter: string): string {
+  if (!monthFilter) return "VŠECHNA OBDOBÍ";
+  const [year, month] = monthFilter.split("-");
+  const name = CZECH_MONTHS[Number(month) - 1] ?? monthFilter;
+  return `${name} ${year}`;
+}
+
+function formatZoneLabel(zoneFilter: string): string {
+  if (!zoneFilter) return "VŠECHNY ZÓNY";
+  return `ZÓNA ${zoneFilter.replace(/^Z/, "")}`;
+}
+
 export const Route = createFileRoute("/evaluation")({
   head: () => ({
     meta: [
@@ -145,6 +162,15 @@ function EvaluationPage() {
   const avgPct = filtered && filtered.audits.length > 0
     ? Math.round(filtered.audits.reduce((acc, a) => acc + (Number(a.total_score) / a.max_score), 0) / filtered.audits.length * 100)
     : 0;
+
+  const printMeta = (() => {
+    const z = formatZoneLabel(zoneFilter);
+    const m = formatPeriodLabel(monthFilter);
+    if (zoneFilter && monthFilter) return `${z}, ${m}`;
+    if (zoneFilter) return z;
+    if (monthFilter) return m;
+    return `${z}, ${m}`;
+  })();
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8 space-y-6">
@@ -269,6 +295,12 @@ function EvaluationPage() {
       ) : (
         <>
           <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000] print-radar">
+            {/* Print-only header: zone + period */}
+            <div className="hidden print:flex print:justify-between print:items-end print:mb-3 print:pb-2 print:border-b-2 print:border-ink">
+              <div className="font-display text-3xl tracking-wider">VYHODNOCENÍ 5S</div>
+              <div className="font-mono text-sm font-bold uppercase tracking-wider">{printMeta}</div>
+            </div>
+
             <div className="flex items-baseline justify-between mb-2 flex-wrap gap-2">
               <div className="font-display text-2xl tracking-wider">
                 Pavučinový graf 5S
