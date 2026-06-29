@@ -177,11 +177,11 @@ function EvaluationPage() {
           }
           .print-radar .print-grid {
             display: grid !important;
-            grid-template-columns: 1fr 88mm !important;
-            gap: 5mm !important;
+            grid-template-columns: 1fr 70mm !important;
+            gap: 3mm !important;
             align-items: stretch !important;
           }
-          .print-radar .print-radar-chart { height: 165mm !important; width: 100% !important; }
+          .print-radar .print-radar-chart { height: 185mm !important; width: 100% !important; }
           .print-radar .print-legend { margin-top: 3mm !important; }
           .print-radar .recharts-wrapper,
           .print-radar .recharts-surface { overflow: visible !important; }
@@ -278,11 +278,11 @@ function EvaluationPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 items-start print-grid">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-4 items-start print-grid">
               {/* Radar */}
-              <div className="h-[520px] w-full print-radar-chart">
+              <div className="h-[620px] w-full print-radar-chart">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={radarData.data} outerRadius="88%" margin={{ top: 20, right: 40, bottom: 20, left: 40 }}>
+                  <RadarChart data={radarData.data} outerRadius="92%" margin={{ top: 10, right: 20, bottom: 10, left: 20 }}>
                     <PolarGrid stroke="#000" strokeOpacity={0.35} />
                     <PolarAngleAxis
                       dataKey="category"
