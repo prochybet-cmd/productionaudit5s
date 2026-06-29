@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MACHINES, Z_GROUP_ORDER, LINE_ORDER, groupMachines } from "@/lib/machines";
 import { useZonesStore } from "@/lib/zones-store";
-import { AdminGate } from "@/components/admin-gate";
+import { AdminLockSection } from "@/components/admin-gate";
 
 export const Route = createFileRoute("/zones")({
   head: () => ({
@@ -27,11 +27,7 @@ export const Route = createFileRoute("/zones")({
       { property: "og:description", content: "Stroje a pokrytí výrobních zón." },
     ],
   }),
-  component: () => (
-    <AdminGate title="Zóny">
-      <ZonesPage />
-    </AdminGate>
-  ),
+  component: ZonesPage,
 });
 
 function ZonesPage() {
@@ -130,7 +126,12 @@ function ZonesPage() {
         </TabsContent>
 
         <TabsContent value="nastaveni" className="mt-6">
-          <ZonesSettings />
+          <AdminLockSection
+            title="Správa zón"
+            description="Změny v seznamu zón (přidání, smazání, deaktivace) jsou chráněné heslem. Zadej heslo pro odemknutí úprav."
+          >
+            <ZonesSettings />
+          </AdminLockSection>
         </TabsContent>
       </Tabs>
     </div>
