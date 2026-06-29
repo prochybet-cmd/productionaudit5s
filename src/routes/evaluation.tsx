@@ -71,7 +71,7 @@ function EvaluationPage() {
   const filtered = useMemo(() => {
     if (!data) return null;
     let audits = data.audits;
-    if (zoneFilter) audits = audits.filter((a) => a.zone === zoneFilter);
+    if (zoneFilter) audits = audits.filter((a) => zoneToGroup(a.zone) === zoneFilter);
     if (auditorFilter) audits = audits.filter((a) => a.auditor === auditorFilter);
     if (monthFilter) audits = audits.filter((a) => a.audit_date.startsWith(monthFilter));
     const auditIds = new Set(audits.map((a) => a.id));
