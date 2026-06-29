@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { MapPin, CalendarDays } from "lucide-react";
+import { MapPin, CalendarDays, Factory, Cog } from "lucide-react";
 import {
   DEFAULT_ZONES,
   MONTH_NAMES_CS,
   formatDateCs,
   generatePlan,
 } from "@/lib/scheduler";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MACHINES, Z_GROUP_ORDER, LINE_ORDER, groupMachines } from "@/lib/machines";
 
 export const Route = createFileRoute("/zones")({
   head: () => ({
