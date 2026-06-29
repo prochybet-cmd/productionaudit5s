@@ -71,7 +71,10 @@ function PlannerPage() {
   const totalAudits = plan.assignments.length;
   const auditorsUsed = new Set(plan.assignments.map((a) => a.auditor)).size;
   const zonesCovered = new Set(plan.assignments.map((a) => a.zone)).size;
-  const todaysAudits = plan.assignments.filter((a) => a.date === todayIso);
+
+  const currentWeek = plan.weeks.find((w) => w.days.some((d) => d.date === todayIso));
+  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8 space-y-8">
@@ -117,34 +120,6 @@ function PlannerPage() {
         </div>
       </section>
 
-      {/* Today highlight */}
-      {todaysAudits.length > 0 && (
-        <section className="border-2 border-ink bg-primary text-ink p-5 shadow-[6px_6px_0_0_#000]">
-          <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
-            <div>
-              <div className="font-mono text-[11px] uppercase tracking-[0.3em]">
-                Dnes · {today.toLocaleDateString("cs-CZ", { weekday: "long" })}
-              </div>
-              <div className="font-display text-3xl tracking-wider">
-                {formatDateCs(todayIso)} — {todaysAudits.length} {todaysAudits.length === 1 ? "audit" : todaysAudits.length < 5 ? "audity" : "auditů"}
-              </div>
-            </div>
-            <div className="font-mono text-xs uppercase">Kdo · kde</div>
-          </div>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {todaysAudits.map((a, i) => (
-              <li key={i} className="bg-ink text-primary px-3 py-2 border-2 border-ink">
-                <div className="font-mono text-[10px] uppercase tracking-wider opacity-80">
-                  {a.zone}
-                </div>
-                <div className="font-display text-lg tracking-wider truncate">
-                  {a.auditor}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
 
       {/* KPI strip */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -156,61 +131,70 @@ function PlannerPage() {
 
       {/* Weekly plan */}
       <section className="space-y-6">
-        {plan.weeks.map((w) => (
-          <div key={w.weekNumber} className="stamp bg-card">
-            <div className="flex items-center justify-between bg-secondary text-secondary-foreground px-4 py-2">
-              <div className="font-display text-xl tracking-wider">
-                Týden {w.weekIndexInMonth}
-              </div>
-              <div className="font-mono text-xs uppercase tracking-wider text-primary">
-                KW {w.weekNumber} · {formatDateCs(w.start)} – {formatDateCs(w.end)} · {w.days.reduce((n, d) => n + d.assignments.length, 0)} auditů
-              </div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-5">
-              {w.days.map((d) => {
-                const isToday = d.date === todayIso;
-                return (
-                <div
-                  key={d.date}
-                  className={`border-l border-border first:border-l-0 border-t md:border-t-0 p-3 min-h-[140px] ${isToday ? "bg-primary/15 ring-2 ring-primary ring-inset relative" : ""}`}
-                >
-                  <div className="flex items-baseline justify-between mb-2">
-                    <div className="font-display text-lg flex items-center gap-2">
-                      {d.weekday}
-                      {isToday && (
-                        <span className="font-mono text-[9px] uppercase tracking-wider bg-ink text-primary px-1.5 py-0.5">
-                          Dnes
-                        </span>
-                      )}
-                    </div>
-                    <div className="font-mono text-[11px] text-muted-foreground">
-                      {formatDateCs(d.date)}
-                    </div>
-                  </div>
-                  <ul className="space-y-1.5">
-                    {d.assignments.map((a, i) => (
-                      <li
-                        key={i}
-                        className={`border-l-4 px-2 py-1.5 ${isToday ? "border-ink bg-primary/40" : "border-primary bg-accent/40"}`}
-                      >
-                        <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground truncate">
-                          {a.zone}
-                        </div>
-                        <div className="text-sm font-medium truncate">
-                          {a.auditor}
-                        </div>
-                      </li>
-                    ))}
-                    {d.assignments.length === 0 && (
-                      <li className="text-xs text-muted-foreground italic">—</li>
-                    )}
-                  </ul>
+        {plan.weeks.map((w) => {
+          const isCurrentWeek = isCurrentMonth && currentWeek?.weekNumber === w.weekNumber;
+          return (
+            <div
+              key={w.weekNumber}
+              className={`stamp bg-card overflow-hidden ${isCurrentWeek ? "ring-4 ring-primary" : ""}`}
+            >
+              <div className="flex items-center justify-between bg-secondary text-secondary-foreground px-4 py-2">
+                <div className="font-display text-xl tracking-wider">
+                  Týden {w.weekIndexInMonth}
                 </div>
-                );
-              })}
+                <div className="font-mono text-xs uppercase tracking-wider text-primary flex items-center gap-2">
+                  <span className={`px-2 py-0.5 ${isCurrentWeek ? "bg-primary text-ink" : ""}`}>
+                    KW {w.weekNumber}
+                  </span>
+                  <span>· {formatDateCs(w.start)} – {formatDateCs(w.end)} · {w.days.reduce((n, d) => n + d.assignments.length, 0)} auditů</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-5">
+                {w.days.map((d) => {
+                  const isToday = d.date === todayIso;
+                  return (
+                    <div
+                      key={d.date}
+                      className={`border-l border-border first:border-l-0 border-t md:border-t-0 p-3 min-h-[140px] ${isToday ? "bg-primary/20 border-l-4 border-r-4 border-y-4 border-primary relative" : ""}`}
+                    >
+                      <div className="flex items-baseline justify-between mb-2">
+                        <div className="font-display text-lg flex items-center gap-2">
+                          {d.weekday}
+                          {isToday && (
+                            <span className="font-mono text-[9px] uppercase tracking-wider bg-ink text-primary px-1.5 py-0.5">
+                              Dnes
+                            </span>
+                          )}
+                        </div>
+                        <div className="font-mono text-[11px] text-muted-foreground">
+                          {formatDateCs(d.date)}
+                        </div>
+                      </div>
+                      <ul className="space-y-1.5">
+                        {d.assignments.map((a, i) => (
+                          <li
+                            key={i}
+                            className={`border-l-4 px-2 py-1.5 ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"}`}
+                          >
+                            <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground truncate">
+                              {a.zone}
+                            </div>
+                            <div className="text-sm font-medium truncate">
+                              {a.auditor}
+                            </div>
+                          </li>
+                        ))}
+                        {d.assignments.length === 0 && (
+                          <li className="text-xs text-muted-foreground italic">—</li>
+                        )}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </section>
 
       <section className="border-2 border-ink bg-secondary text-secondary-foreground p-6 flex flex-wrap items-center justify-between gap-4">
