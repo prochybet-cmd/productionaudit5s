@@ -104,21 +104,21 @@ function EvaluationPage() {
   }, [filtered]);
 
 
-  // Per-checklist breakdown: max = 25 b/sekce, 125 b celkem;
-  // "Získané" = průměrné skóre na jeden audit v dané kategorii (0–25).
+  // Per-checklist breakdown — souhrn za všechny audity ve filtru.
+  // Max = 25 b/sekce × počet auditů; Získané = součet všech bodů v sekci.
   const breakdown = useMemo(() => {
     if (!filtered) return [];
     const auditCount = filtered.audits.length;
     return CATEGORIES.map((c) => {
-      const maxScore = c.max; // 25 b per sekce (5 položek × 5)
+      const maxScore = c.max * auditCount; // 25 b × počet auditů
       const scoresInCat = filtered.scores.filter((s) => s.category === c.key);
-      const totalGained = scoresInCat.reduce((acc, s) => acc + s.score, 0);
-      const gained = auditCount > 0 ? Number((totalGained / auditCount).toFixed(1)) : 0;
-      const avg = scoresInCat.length > 0 ? totalGained / scoresInCat.length : 0; // 0–5 na položku
+      const gained = scoresInCat.reduce((acc, s) => acc + s.score, 0);
+      const avg = scoresInCat.length > 0 ? gained / scoresInCat.length : 0; // 0–5 na položku
       const pct = maxScore > 0 ? Math.round((gained / maxScore) * 100) : 0;
       return { cs: c.cs, maxScore, gained, avg, pct };
     });
   }, [filtered]);
+
 
 
   const trendData = useMemo(() => {
