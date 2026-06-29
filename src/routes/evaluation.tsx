@@ -234,7 +234,7 @@ function EvaluationPage() {
                 Pavučinový graf 5S
               </div>
               <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                {groupBy === "zone" ? "podle zón (Z)" : groupBy === "auditor" ? "podle auditorů" : "podle měsíců"} · škála 0–5
+                celkové průměrné skóre · škála 0–5
               </div>
             </div>
 
