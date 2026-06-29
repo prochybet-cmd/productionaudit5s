@@ -163,6 +163,15 @@ function EvaluationPage() {
     ? Math.round(filtered.audits.reduce((acc, a) => acc + (Number(a.total_score) / a.max_score), 0) / filtered.audits.length * 100)
     : 0;
 
+  const printMeta = (() => {
+    const z = formatZoneLabel(zoneFilter);
+    const m = formatPeriodLabel(monthFilter);
+    if (zoneFilter && monthFilter) return `${z}, ${m}`;
+    if (zoneFilter) return z;
+    if (monthFilter) return m;
+    return `${z}, ${m}`;
+  })();
+
   return (
     <div className="mx-auto max-w-7xl px-6 py-8 space-y-6">
       {/* A4 print stylesheet — hides everything except the radar panel */}
