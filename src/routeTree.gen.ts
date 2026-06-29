@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ZonesRouteImport } from './routes/zones'
 import { Route as EvaluationRouteImport } from './routes/evaluation'
+import { Route as DataEntryRouteImport } from './routes/data-entry'
 import { Route as ChecklistRouteImport } from './routes/checklist'
 import { Route as AuditorRouteImport } from './routes/auditor'
 import { Route as ArchiveRouteImport } from './routes/archive'
@@ -25,6 +26,11 @@ const ZonesRoute = ZonesRouteImport.update({
 const EvaluationRoute = EvaluationRouteImport.update({
   id: '/evaluation',
   path: '/evaluation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DataEntryRoute = DataEntryRouteImport.update({
+  id: '/data-entry',
+  path: '/data-entry',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChecklistRoute = ChecklistRouteImport.update({
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/archive': typeof ArchiveRouteWithChildren
   '/auditor': typeof AuditorRoute
   '/checklist': typeof ChecklistRoute
+  '/data-entry': typeof DataEntryRoute
   '/evaluation': typeof EvaluationRoute
   '/zones': typeof ZonesRoute
   '/archive/$id': typeof ArchiveIdRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/archive': typeof ArchiveRouteWithChildren
   '/auditor': typeof AuditorRoute
   '/checklist': typeof ChecklistRoute
+  '/data-entry': typeof DataEntryRoute
   '/evaluation': typeof EvaluationRoute
   '/zones': typeof ZonesRoute
   '/archive/$id': typeof ArchiveIdRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/archive': typeof ArchiveRouteWithChildren
   '/auditor': typeof AuditorRoute
   '/checklist': typeof ChecklistRoute
+  '/data-entry': typeof DataEntryRoute
   '/evaluation': typeof EvaluationRoute
   '/zones': typeof ZonesRoute
   '/archive/$id': typeof ArchiveIdRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/archive'
     | '/auditor'
     | '/checklist'
+    | '/data-entry'
     | '/evaluation'
     | '/zones'
     | '/archive/$id'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/archive'
     | '/auditor'
     | '/checklist'
+    | '/data-entry'
     | '/evaluation'
     | '/zones'
     | '/archive/$id'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/archive'
     | '/auditor'
     | '/checklist'
+    | '/data-entry'
     | '/evaluation'
     | '/zones'
     | '/archive/$id'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   ArchiveRoute: typeof ArchiveRouteWithChildren
   AuditorRoute: typeof AuditorRoute
   ChecklistRoute: typeof ChecklistRoute
+  DataEntryRoute: typeof DataEntryRoute
   EvaluationRoute: typeof EvaluationRoute
   ZonesRoute: typeof ZonesRoute
 }
@@ -134,6 +147,13 @@ declare module '@tanstack/react-router' {
       path: '/evaluation'
       fullPath: '/evaluation'
       preLoaderRoute: typeof EvaluationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data-entry': {
+      id: '/data-entry'
+      path: '/data-entry'
+      fullPath: '/data-entry'
+      preLoaderRoute: typeof DataEntryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/checklist': {
@@ -190,6 +210,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArchiveRoute: ArchiveRouteWithChildren,
   AuditorRoute: AuditorRoute,
   ChecklistRoute: ChecklistRoute,
+  DataEntryRoute: DataEntryRoute,
   EvaluationRoute: EvaluationRoute,
   ZonesRoute: ZonesRoute,
 }

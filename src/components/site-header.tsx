@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { CalendarRange, UserSearch, ClipboardList, ClipboardCheck, Archive, BarChart3 } from "lucide-react";
+import { CalendarRange, UserSearch, ClipboardList, ClipboardCheck, FileSpreadsheet, Archive, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const nav = [
@@ -7,6 +7,7 @@ const nav = [
   { to: "/auditor", label: "Auditor", icon: UserSearch },
   { to: "/zones", label: "Zóny", icon: ClipboardList },
   { to: "/checklist", label: "Checklist", icon: ClipboardCheck },
+  { to: "/data-entry", label: "Zápis dat", icon: FileSpreadsheet },
   { to: "/archive", label: "Archiv", icon: Archive },
   { to: "/evaluation", label: "Vyhodnocení", icon: BarChart3 },
 ] as const;
