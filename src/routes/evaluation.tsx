@@ -162,17 +162,32 @@ function EvaluationPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-8 space-y-6">
-      <section>
-        <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-          Souhrn
+      {/* A4 print stylesheet — hides everything except the radar panel */}
+      <style>{`
+        @media print {
+          @page { size: A4 landscape; margin: 10mm; }
+          body * { visibility: hidden !important; }
+          .print-radar, .print-radar * { visibility: visible !important; }
+          .print-radar { position: absolute; inset: 0; width: 100%; box-shadow: none !important; border: 2px solid #000 !important; padding: 8mm !important; }
+          .no-print { display: none !important; }
+        }
+      `}</style>
+      <section className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+            Souhrn
+          </div>
+          <h1 className="font-display text-5xl text-ink mt-1 flex items-center gap-3">
+            <BarChart3 className="h-10 w-10 text-primary" />
+            Vyhodnocení 5S auditů
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2 max-w-3xl">
+            Pavučinové grafy průměrného skóre v 5 kategoriích Seiri / Seiton / Seiso / Seiketsu / Shitsuke. Filtruj podle zóny, auditora, měsíce a vyber, jak data seskupit.
+          </p>
         </div>
-        <h1 className="font-display text-5xl text-ink mt-1 flex items-center gap-3">
-          <BarChart3 className="h-10 w-10 text-primary" />
-          Vyhodnocení 5S auditů
-        </h1>
-        <p className="text-sm text-muted-foreground mt-2 max-w-3xl">
-          Pavučinové grafy průměrného skóre v 5 kategoriích Seiri / Seiton / Seiso / Seiketsu / Shitsuke. Filtruj podle zóny, auditora, měsíce a vyber, jak data seskupit.
-        </p>
+        <Button onClick={() => window.print()} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90 no-print">
+          <Printer className="h-4 w-4" /> Tisk grafu (A4)
+        </Button>
       </section>
 
       {/* Filters */}
