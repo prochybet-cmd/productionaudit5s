@@ -1,12 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Search, MapPin, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { MapPin, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   DEFAULT_AUDITORS,
   MONTH_NAMES_CS,
+  MONTH_SHORT_NAMES_CS,
   formatDateCs,
   generatePlan,
 } from "@/lib/scheduler";
