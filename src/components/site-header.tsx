@@ -26,7 +26,7 @@ export function SiteHeader() {
           <div className="leading-tight">
             <div className="font-display text-xl tracking-wider">AUDIT PLANNER</div>
             <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-primary">
-              Shop-floor / Automotive
+              SHOP-FLOOR
             </div>
           </div>
         </Link>
