@@ -89,7 +89,7 @@ function EvaluationPage() {
       const a = auditMap.get(s.audit_id);
       if (!a) continue;
       const key =
-        groupBy === "zone" ? a.zone :
+        groupBy === "zone" ? (zoneToGroup(a.zone) ?? "—") :
         groupBy === "auditor" ? a.auditor :
         a.audit_date.slice(0, 7);
       if (!groups.has(key)) {
