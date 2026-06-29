@@ -151,18 +151,24 @@ function EvaluationPage() {
       {/* A4 print stylesheet — hides everything except the radar panel */}
       <style>{`
         @media print {
-          @page { size: A4 landscape; margin: 8mm; }
+          @page { size: A4 landscape; margin: 6mm; }
           html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
           body * { visibility: hidden !important; }
           .print-radar, .print-radar * { visibility: visible !important; }
           .no-print { display: none !important; }
+          /* Force browsers to print background colors (legend bands, breakdown headers) */
+          .print-radar, .print-radar * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
           .print-radar {
             position: fixed !important;
             top: 0; left: 0; right: 0; bottom: 0;
             width: 100% !important;
             height: 100% !important;
             margin: 0 !important;
-            padding: 6mm !important;
+            padding: 5mm !important;
             box-shadow: none !important;
             border: 2px solid #000 !important;
             background: #fff !important;
@@ -171,16 +177,24 @@ function EvaluationPage() {
           }
           .print-radar .print-grid {
             display: grid !important;
-            grid-template-columns: 1fr 95mm !important;
-            gap: 6mm !important;
-            align-items: start !important;
+            grid-template-columns: 1fr 88mm !important;
+            gap: 5mm !important;
+            align-items: stretch !important;
           }
-          .print-radar .print-radar-chart { height: 150mm !important; }
-          .print-radar .print-legend { margin-top: 4mm !important; }
+          .print-radar .print-radar-chart { height: 165mm !important; width: 100% !important; }
+          .print-radar .print-legend { margin-top: 3mm !important; }
           .print-radar .recharts-wrapper,
           .print-radar .recharts-surface { overflow: visible !important; }
+          /* Highlight total score block */
+          .print-radar .print-total {
+            border-width: 3px !important;
+          }
+          .print-radar .print-total .print-total-title { font-size: 13px !important; padding: 3px 0 !important; }
+          .print-radar .print-total .print-total-row { font-size: 13px !important; }
+          .print-radar .print-total .print-total-result { font-size: 18px !important; font-weight: 900 !important; }
         }
       `}</style>
+
       <section className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
