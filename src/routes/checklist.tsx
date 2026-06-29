@@ -77,6 +77,15 @@ function ChecklistPage() {
   const totalPct = Math.round((total / MAX_TOTAL) * 100);
   const allFilled = filledCount === 25;
 
+  const printTemplate = () => {
+    const w = window.open("/checklist-template.pdf", "_blank");
+    if (w) {
+      w.addEventListener("load", () => {
+        try { w.focus(); w.print(); } catch { /* noop */ }
+      });
+    }
+  };
+
   const reset = () => {
     const init: Scores = {};
     for (const cat of CHECKLIST) for (const it of cat.items) init[it.id] = null;
@@ -145,7 +154,7 @@ function ChecklistPage() {
           <Button variant="outline" onClick={reset} className="gap-2">
             <RotateCcw className="h-4 w-4" /> Vyčistit
           </Button>
-          <Button variant="outline" onClick={() => window.print()} className="gap-2">
+          <Button variant="outline" onClick={printTemplate} className="gap-2">
             <Printer className="h-4 w-4" /> Tisk / PDF
           </Button>
           <Button
@@ -328,7 +337,7 @@ function ChecklistPage() {
         <Button variant="outline" onClick={reset} className="gap-2">
           <RotateCcw className="h-4 w-4" /> Vyčistit
         </Button>
-        <Button variant="outline" onClick={() => window.print()} className="gap-2">
+        <Button variant="outline" onClick={printTemplate} className="gap-2">
           <Printer className="h-4 w-4" /> Tisk / PDF
         </Button>
         <Button
