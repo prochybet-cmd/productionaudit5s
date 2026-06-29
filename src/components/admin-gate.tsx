@@ -93,3 +93,103 @@ export function AdminGate({ children, title }: { children: ReactNode; title: str
     </div>
   );
 }
+
+export function AdminLockSection({
+  children,
+  title,
+  description,
+}: {
+  children: ReactNode;
+  title: string;
+  description?: string;
+}) {
+  const [unlocked, setUnlocked] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [value, setValue] = useState("");
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setUnlocked(isAdminUnlocked());
+    const handler = () => setUnlocked(isAdminUnlocked());
+    window.addEventListener("admin-lock-change", handler);
+    window.addEventListener("storage", handler);
+    return () => {
+      window.removeEventListener("admin-lock-change", handler);
+      window.removeEventListener("storage", handler);
+    };
+  }, []);
+
+  if (!mounted) return null;
+
+  if (unlocked) {
+    return (
+      <div className="space-y-2">
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => lockAdmin()}
+            className="font-mono text-[10px] uppercase tracking-wider"
+          >
+            <Lock className="mr-1 h-3 w-3" /> Zamknout
+          </Button>
+        </div>
+        {children}
+      </div>
+    );
+  }
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (value.trim().toLowerCase() === PASSWORD) {
+      window.localStorage.setItem(STORAGE_KEY, "1");
+      window.dispatchEvent(new Event("admin-lock-change"));
+      setUnlocked(true);
+      setError(false);
+    } else {
+      setError(true);
+    }
+  }
+
+  return (
+    <div className="border-2 border-dashed border-ink bg-card p-6 shadow-[6px_6px_0_0_#000]">
+      <div className="mb-4 flex items-center gap-3">
+        <div className="grid h-10 w-10 place-items-center bg-primary text-primary-foreground">
+          <Lock className="h-5 w-5" />
+        </div>
+        <div>
+          <div className="font-display text-xl tracking-wider">{title}</div>
+          <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            Pro úpravy zadej heslo
+          </div>
+        </div>
+      </div>
+      {description && (
+        <p className="mb-3 text-xs text-muted-foreground">{description}</p>
+      )}
+      <form onSubmit={submit} className="flex flex-wrap items-end gap-2">
+        <label className="flex-1 min-w-[200px]">
+          <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+            Heslo
+          </span>
+          <Input
+            type="password"
+            value={value}
+            onChange={(e) => {
+              setValue(e.target.value);
+              setError(false);
+            }}
+            className="mt-1"
+          />
+        </label>
+        <Button type="submit">Odemknout úpravy</Button>
+      </form>
+      {error && (
+        <div className="mt-3 border-l-4 border-destructive bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          Nesprávné heslo.
+        </div>
+      )}
+    </div>
+  );
+}
