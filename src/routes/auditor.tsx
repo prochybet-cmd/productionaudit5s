@@ -19,6 +19,7 @@ import {
   generatePlan,
 } from "@/lib/scheduler";
 import { useAuditorsStore } from "@/lib/auditors-store";
+import { AdminGate } from "@/components/admin-gate";
 
 export const Route = createFileRoute("/auditor")({
   head: () => ({
@@ -33,7 +34,11 @@ export const Route = createFileRoute("/auditor")({
       { property: "og:description", content: "Vyhledávání plánu auditora podle jména." },
     ],
   }),
-  component: AuditorPage,
+  component: () => (
+    <AdminGate title="Auditor">
+      <AuditorPage />
+    </AdminGate>
+  ),
 });
 
 function AuditorPage() {

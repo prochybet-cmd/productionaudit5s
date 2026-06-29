@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MACHINES, Z_GROUP_ORDER, LINE_ORDER, groupMachines } from "@/lib/machines";
 import { useZonesStore } from "@/lib/zones-store";
+import { AdminGate } from "@/components/admin-gate";
 
 export const Route = createFileRoute("/zones")({
   head: () => ({
@@ -26,7 +27,11 @@ export const Route = createFileRoute("/zones")({
       { property: "og:description", content: "Stroje a pokrytí výrobních zón." },
     ],
   }),
-  component: ZonesPage,
+  component: () => (
+    <AdminGate title="Zóny">
+      <ZonesPage />
+    </AdminGate>
+  ),
 });
 
 function ZonesPage() {
