@@ -282,7 +282,7 @@ function EvaluationPage() {
               {/* Radar */}
               <div className="h-[520px] w-full print-radar-chart">
                 <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart data={radarData.data} outerRadius="78%">
+                  <RadarChart data={radarData.data} outerRadius="88%" margin={{ top: 20, right: 40, bottom: 20, left: 40 }}>
                     <PolarGrid stroke="#000" strokeOpacity={0.35} />
                     <PolarAngleAxis
                       dataKey="category"
