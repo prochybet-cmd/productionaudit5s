@@ -8,6 +8,7 @@ import {
   CalendarCheck2,
   Maximize2,
   Check,
+  X,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -70,13 +71,19 @@ function PlannerPage() {
     },
   });
 
-  const completedKeySet = useMemo(() => {
-    const set = new Set<string>();
+  // Map weekNumber -> Set of zones audited in that week (any day Mon-Sun)
+  const completedByWeek = useMemo(() => {
+    const map = new Map<number, Set<string>>();
+    for (const w of plan.weeks) map.set(w.weekNumber, new Set());
     for (const a of completedAudits ?? []) {
-      set.add(`${a.audit_date}|${a.zone}`);
+      const w = plan.weeks.find((wk) => a.audit_date >= wk.start && a.audit_date <= wk.end);
+      if (w) map.get(w.weekNumber)!.add(a.zone);
     }
-    return set;
-  }, [completedAudits]);
+    return map;
+  }, [completedAudits, plan.weeks]);
+
+  const isAssignmentCompleted = (weekNumber: number, zone: string) =>
+    completedByWeek.get(weekNumber)?.has(zone) ?? false;
 
   const goto = (delta: number) => {
     const d = new Date(year, month + delta, 1);
@@ -94,7 +101,10 @@ function PlannerPage() {
     ? plan.weeks.filter((w) => w.end >= todayIso)
     : plan.weeks;
 
-  const completedCount = plan.assignments.filter((a) => a.date < todayIso).length;
+  const completedCount = plan.assignments.filter((a) => {
+    const w = plan.weeks.find((wk) => a.date >= wk.start && a.date <= wk.end);
+    return w ? isAssignmentCompleted(w.weekNumber, a.zone) : false;
+  }).length;
 
 
 
@@ -198,7 +208,9 @@ function PlannerPage() {
                           {d.assignments.map((a, i) => {
                             const key = `${a.date}-${i}`;
                             const isExpanded = expanded === key;
-                            const isCompleted = completedKeySet.has(`${a.date}|${a.zone}`);
+                            const isCompleted = isAssignmentCompleted(w.weekNumber, a.zone);
+                            const weekEnded = todayIso > w.end;
+                            const isMissed = !isCompleted && weekEnded;
                             const [zoneCode, zoneName] = a.zone.includes(" — ")
                               ? a.zone.split(" — ")
                               : [a.zone, ""];
@@ -206,7 +218,7 @@ function PlannerPage() {
                               <li
                                 key={i}
                                 onClick={() => setExpanded(isExpanded ? null : key)}
-                                className={`border-l-4 px-2 py-1.5 cursor-pointer transition-all ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"} ${isExpanded ? "py-3" : ""} ${isCompleted ? "ring-2 ring-emerald-500/60" : ""}`}
+                                className={`border-l-4 px-2 py-1.5 cursor-pointer transition-all ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"} ${isExpanded ? "py-3" : ""} ${isCompleted ? "ring-2 ring-emerald-500/60" : ""} ${isMissed ? "ring-2 ring-red-500/60" : ""}`}
                                 title="Klikni pro zvětšení zóny"
                               >
                                 {isExpanded ? (
@@ -219,6 +231,11 @@ function PlannerPage() {
                                         {isCompleted && (
                                           <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider bg-emerald-500 text-white px-1.5 py-0.5">
                                             <Check className="h-3 w-3" /> Auditován
+                                          </span>
+                                        )}
+                                        {isMissed && (
+                                          <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider bg-red-600 text-white px-1.5 py-0.5">
+                                            <X className="h-3 w-3" /> Neproveden
                                           </span>
                                         )}
                                         <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />
@@ -240,8 +257,13 @@ function PlannerPage() {
                                         {a.zone}
                                       </div>
                                       {isCompleted && (
-                                        <span className="inline-flex items-center justify-center rounded-full bg-emerald-500 text-white p-0.5" title="Audit uložen v archivu">
+                                        <span className="inline-flex items-center justify-center rounded-full bg-emerald-500 text-white p-0.5" title="Audit uložen v archivu (stejný týden)">
                                           <Check className="h-3 w-3" />
+                                        </span>
+                                      )}
+                                      {isMissed && (
+                                        <span className="inline-flex items-center justify-center rounded-full bg-red-600 text-white p-0.5" title="Audit neproveden v daném týdnu">
+                                          <X className="h-3 w-3" />
                                         </span>
                                       )}
                                     </div>
