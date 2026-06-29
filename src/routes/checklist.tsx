@@ -291,6 +291,16 @@ function ChecklistPage() {
         );
       })}
 
+      <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000] space-y-2 print:hidden">
+        <Label className="font-mono text-[10px] uppercase tracking-[0.2em]">Celková poznámka k auditu (volitelné)</Label>
+        <Textarea
+          value={overallNote}
+          onChange={(e) => setOverallNote(e.target.value)}
+          rows={3}
+          placeholder="Souhrnné připomínky, opatření, follow-up..."
+        />
+      </section>
+
       <section className="border-2 border-ink bg-secondary text-secondary-foreground p-5 flex flex-wrap items-center justify-between gap-4 print:hidden">
         <div>
           <div className="font-display text-xl tracking-wider">Podpisy</div>
