@@ -14,7 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      audit_scores: {
+        Row: {
+          audit_id: string
+          category: string
+          id: string
+          item_id: number
+          note: string | null
+          score: number
+        }
+        Insert: {
+          audit_id: string
+          category: string
+          id?: string
+          item_id: number
+          note?: string | null
+          score: number
+        }
+        Update: {
+          audit_id?: string
+          category?: string
+          id?: string
+          item_id?: number
+          note?: string | null
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_scores_audit_id_fkey"
+            columns: ["audit_id"]
+            isOneToOne: false
+            referencedRelation: "audits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audits: {
+        Row: {
+          audit_date: string
+          auditor: string
+          created_at: string
+          id: string
+          max_score: number
+          note: string | null
+          total_score: number
+          zone: string
+        }
+        Insert: {
+          audit_date: string
+          auditor: string
+          created_at?: string
+          id?: string
+          max_score?: number
+          note?: string | null
+          total_score: number
+          zone: string
+        }
+        Update: {
+          audit_date?: string
+          auditor?: string
+          created_at?: string
+          id?: string
+          max_score?: number
+          note?: string | null
+          total_score?: number
+          zone?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
