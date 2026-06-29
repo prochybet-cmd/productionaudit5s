@@ -140,7 +140,7 @@ function PlannerPage() {
       {/* Weekly plan */}
       <section className="space-y-6">
         {visibleWeeks.map((w) => {
-          const isCurrentWeek = isCurrentMonth && currentWeek?.weekNumber === w.weekNumber;
+          const isCurrentWeek = showTodayHighlight && currentWeek?.weekNumber === w.weekNumber;
           return (
             <div
               key={w.weekNumber}
