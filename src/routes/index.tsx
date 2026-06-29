@@ -6,29 +6,16 @@ import {
   Users,
   MapPin,
   CalendarCheck2,
-  Settings2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  DEFAULT_ZONES,
   MONTH_NAMES_CS,
   formatDateCs,
   generatePlan,
 } from "@/lib/scheduler";
 import { useAuditorsStore } from "@/lib/auditors-store";
+import { useZonesStore } from "@/lib/zones-store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -55,8 +42,8 @@ function PlannerPage() {
   // Plánujeme celý červenec 2026 (KW27 obsahuje 29.–30. 6. jako součást července).
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(6); // 0-based → červenec
-  const [zones, setZones] = useState<string[]>(DEFAULT_ZONES);
-  const { all: allAuditors, active: auditors, save: saveAuditors } = useAuditorsStore();
+  const { active: zones } = useZonesStore();
+  const { active: auditors } = useAuditorsStore();
 
   const plan = useMemo(
     () => generatePlan({ year, month, zones, auditors }),
@@ -117,14 +104,6 @@ function PlannerPage() {
           <Button variant="outline" size="icon" onClick={() => goto(1)}>
             <ChevronRight className="h-4 w-4" />
           </Button>
-          <ConfigDialog
-            zones={zones}
-            auditors={allAuditors}
-            onSave={(z, a) => {
-              setZones(z);
-              saveAuditors({ all: a, active: a.filter((n) => auditors.includes(n) || !allAuditors.includes(n)) });
-            }}
-          />
         </div>
       </section>
 
@@ -253,84 +232,3 @@ function KpiCard({
   );
 }
 
-function ConfigDialog({
-  zones,
-  auditors,
-  onSave,
-}: {
-  zones: string[];
-  auditors: string[];
-  onSave: (z: string[], a: string[]) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [zonesText, setZonesText] = useState(zones.join("\n"));
-  const [auditorsText, setAuditorsText] = useState(auditors.join("\n"));
-
-  return (
-    <Dialog open={open} onOpenChange={(o) => {
-      setOpen(o);
-      if (o) {
-        setZonesText(zones.join("\n"));
-        setAuditorsText(auditors.join("\n"));
-      }
-    }}>
-      <DialogTrigger asChild>
-        <Button variant="secondary" className="gap-2">
-          <Settings2 className="h-4 w-4" />
-          Nastavení
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="font-display tracking-wider text-2xl">
-            Zóny a auditoři
-          </DialogTitle>
-        </DialogHeader>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-wider">
-              Zóny ({zonesText.split("\n").filter(Boolean).length})
-            </Label>
-            <textarea
-              value={zonesText}
-              onChange={(e) => setZonesText(e.target.value)}
-              rows={14}
-              className="w-full font-mono text-sm border-2 border-input p-2 bg-background"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label className="font-mono text-xs uppercase tracking-wider">
-              Auditoři ({auditorsText.split("\n").filter(Boolean).length})
-            </Label>
-            <textarea
-              value={auditorsText}
-              onChange={(e) => setAuditorsText(e.target.value)}
-              rows={14}
-              className="w-full font-mono text-sm border-2 border-input p-2 bg-background"
-            />
-          </div>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Jedna položka na řádek. Aplikace přepočte plán okamžitě po uložení.
-        </p>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>
-            Zrušit
-          </Button>
-          <Button
-            onClick={() => {
-              const z = zonesText.split("\n").map((s) => s.trim()).filter(Boolean);
-              const a = auditorsText.split("\n").map((s) => s.trim()).filter(Boolean);
-              if (z.length === 0 || a.length === 0) return;
-              onSave(z, a);
-              setOpen(false);
-            }}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            Uložit a přepočítat
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
