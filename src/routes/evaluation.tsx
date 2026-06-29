@@ -360,17 +360,17 @@ function EvaluationPage() {
                     </div>
                   </div>
                 ))}
-                <div className="border-2 border-ink bg-ink text-white">
-                  <div className="text-center font-mono text-xs font-bold py-1 border-b-2 border-white/30">
-                    Celkové skóre
+                <div className="border-2 border-ink bg-ink text-white print-total mt-1">
+                  <div className="text-center font-mono text-sm font-extrabold py-1.5 border-b-2 border-white/40 tracking-wider print-total-title">
+                    CELKOVÉ SKÓRE
                   </div>
-                  <div className="grid grid-cols-2 text-[11px] font-mono">
-                    <div className="px-2 py-0.5">Maximální skóre</div>
-                    <div className="px-2 py-0.5 text-right">{breakdown.reduce((a, b) => a + b.maxScore, 0)}</div>
-                    <div className="px-2 py-0.5">Získané skóre</div>
-                    <div className="px-2 py-0.5 text-right">{breakdown.reduce((a, b) => a + b.gained, 0)}</div>
-                    <div className="px-2 py-0.5 font-bold">Výsledek</div>
-                    <div className="px-2 py-0.5 text-right font-bold">{avgPct} %</div>
+                  <div className="grid grid-cols-2 text-xs font-mono">
+                    <div className="px-2 py-1 print-total-row">Maximální skóre</div>
+                    <div className="px-2 py-1 text-right print-total-row">{breakdown.reduce((a, b) => a + b.maxScore, 0)}</div>
+                    <div className="px-2 py-1 print-total-row">Získané skóre</div>
+                    <div className="px-2 py-1 text-right print-total-row">{breakdown.reduce((a, b) => a + b.gained, 0).toFixed(1)}</div>
+                    <div className="px-2 py-1.5 font-extrabold border-t-2 border-white/40 print-total-result">Výsledek</div>
+                    <div className="px-2 py-1.5 text-right font-extrabold border-t-2 border-white/40 print-total-result">{avgPct} %</div>
                   </div>
                 </div>
               </div>
