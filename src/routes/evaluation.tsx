@@ -10,7 +10,29 @@ import {
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { CHECKLIST } from "@/lib/checklist";
-import { DEFAULT_AUDITORS, DEFAULT_ZONES } from "@/lib/scheduler";
+import { DEFAULT_AUDITORS } from "@/lib/scheduler";
+
+// Mapping of Z-groups (reporting zones) to underlying L-zones (audit zones)
+const Z_GROUPS: Record<string, string[]> = {
+  Z1A: ["L9", "L10"],
+  Z1B: ["L7", "L8"],
+  Z2: ["L1", "L2", "L3", "L4"],
+  Z3: ["L5", "L6", "L11", "L12"],
+};
+const Z_GROUP_KEYS = Object.keys(Z_GROUPS);
+// Map L-zone -> Z-group. Zone names in DB start with "L1 — ...", "L9 — ..." etc.
+function lZoneCode(zoneName: string): string | null {
+  const m = zoneName.match(/^(L\d{1,2})/);
+  return m ? m[1] : null;
+}
+function zoneToGroup(zoneName: string): string | null {
+  const code = lZoneCode(zoneName);
+  if (!code) return null;
+  for (const [g, list] of Object.entries(Z_GROUPS)) {
+    if (list.includes(code)) return g;
+  }
+  return null;
+}
 
 export const Route = createFileRoute("/evaluation")({
   head: () => ({
@@ -49,7 +71,7 @@ function EvaluationPage() {
   const filtered = useMemo(() => {
     if (!data) return null;
     let audits = data.audits;
-    if (zoneFilter) audits = audits.filter((a) => a.zone === zoneFilter);
+    if (zoneFilter) audits = audits.filter((a) => zoneToGroup(a.zone) === zoneFilter);
     if (auditorFilter) audits = audits.filter((a) => a.auditor === auditorFilter);
     if (monthFilter) audits = audits.filter((a) => a.audit_date.startsWith(monthFilter));
     const auditIds = new Set(audits.map((a) => a.id));
@@ -67,7 +89,7 @@ function EvaluationPage() {
       const a = auditMap.get(s.audit_id);
       if (!a) continue;
       const key =
-        groupBy === "zone" ? a.zone :
+        groupBy === "zone" ? (zoneToGroup(a.zone) ?? "—") :
         groupBy === "auditor" ? a.auditor :
         a.audit_date.slice(0, 7);
       if (!groups.has(key)) {
@@ -137,11 +159,13 @@ function EvaluationPage() {
       <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000] grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="space-y-1.5">
           <Label className="font-mono text-[10px] uppercase tracking-[0.2em] flex items-center gap-1">
-            <Filter className="h-3 w-3" /> Zóna
+            <Filter className="h-3 w-3" /> Zóna (Z)
           </Label>
           <select value={zoneFilter} onChange={(e) => setZoneFilter(e.target.value)} className="w-full border-2 border-input bg-background px-3 py-2 font-mono text-sm">
             <option value="">Všechny zóny</option>
-            {DEFAULT_ZONES.map((z) => <option key={z} value={z}>{z}</option>)}
+            {Z_GROUP_KEYS.map((z) => (
+              <option key={z} value={z}>{z} ({Z_GROUPS[z].join(", ")})</option>
+            ))}
           </select>
         </div>
         <div className="space-y-1.5">
