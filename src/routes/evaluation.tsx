@@ -48,6 +48,12 @@ export const Route = createFileRoute("/evaluation")({
 const CATEGORIES = CHECKLIST.map((c) => ({ key: c.key, code: c.code, cs: c.cs, max: c.items.length * 5 }));
 const RADAR_COLORS = ["hsl(48 98% 52%)", "hsl(28 95% 55%)", "hsl(200 80% 50%)", "hsl(340 75% 55%)", "hsl(150 60% 45%)", "hsl(270 70% 60%)"];
 
+// Extract hex colors from the shared checklist SCORE_LEGEND so the evaluation page uses the same scale as the checklist.
+const SCORE_COLORS = SCORE_LEGEND.map((s) => {
+  const m = s.bg.match(/#([0-9a-fA-F]{6})/);
+  return m ? m[0] : "#999";
+});
+
 type GroupBy = "zone" | "auditor" | "month";
 
 function EvaluationPage() {
