@@ -23,7 +23,6 @@ import "@fontsource/jetbrains-mono/500.css";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "@/components/site-header";
-import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -94,13 +93,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Interaktivní plánovač 5S auditů ve výrobě kovových konstrukcí autosedaček. Měsíční plán, vyhledávání auditora, rotace zón.",
       },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "5S Audit Planner" },
+      { property: "og:title", content: "5S Audit Planner — automotive shop-floor" },
       {
         property: "og:description",
         content: "Měsíční plán 5S auditů pro automotive výrobu.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "5S Audit Planner — automotive shop-floor" },
+      { name: "description", content: "AuditFlow Pro is an interactive 5S audit planner for manufacturing environments." },
+      { property: "og:description", content: "AuditFlow Pro is an interactive 5S audit planner for manufacturing environments." },
+      { name: "twitter:description", content: "AuditFlow Pro is an interactive 5S audit planner for manufacturing environments." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/fd169167-7a23-4ad1-a01f-c9ccfd472a73/id-preview-38dbc425--a0a399fd-9db9-4e1a-ad1c-306f137db23a.lovable.app-1782727367344.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/fd169167-7a23-4ad1-a01f-c9ccfd472a73/id-preview-38dbc425--a0a399fd-9db9-4e1a-ad1c-306f137db23a.lovable.app-1782727367344.png" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
   }),
@@ -138,7 +143,6 @@ function RootComponent() {
           Lean Manufacturing · IATF mindset · 5S
         </footer>
       </div>
-      <Toaster />
     </QueryClientProvider>
   );
 }
