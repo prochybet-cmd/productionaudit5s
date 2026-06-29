@@ -44,6 +44,23 @@ export const DEFAULT_AUDITORS: string[] = [
   "K Lévai (KLE)",
 ];
 
+// České státní svátky (rozšiřitelné)
+export const HOLIDAYS: Record<string, string> = {
+  "2026-01-01": "Nový rok",
+  "2026-04-03": "Velký pátek",
+  "2026-04-06": "Velikonoční pondělí",
+  "2026-05-01": "Svátek práce",
+  "2026-05-08": "Den vítězství",
+  "2026-07-05": "Sv. Cyril a Metoděj",
+  "2026-07-06": "Den upálení mistra Jana Husa",
+  "2026-09-28": "Den české státnosti",
+  "2026-10-28": "Den vzniku samostatného Československa",
+  "2026-11-17": "Den boje za svobodu a demokracii",
+  "2026-12-24": "Štědrý den",
+  "2026-12-25": "1. svátek vánoční",
+  "2026-12-26": "2. svátek vánoční",
+};
+
 export interface AuditAssignment {
   date: string;        // ISO yyyy-mm-dd
   weekday: string;     // Po, Út, …
