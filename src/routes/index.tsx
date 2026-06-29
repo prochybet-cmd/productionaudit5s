@@ -119,10 +119,10 @@ function PlannerPage() {
           </Button>
           <ConfigDialog
             zones={zones}
-            auditors={auditors}
+            auditors={allAuditors}
             onSave={(z, a) => {
               setZones(z);
-              setAuditors(a);
+              saveAuditors({ all: a, active: a.filter((n) => auditors.includes(n) || !allAuditors.includes(n)) });
             }}
           />
         </div>
