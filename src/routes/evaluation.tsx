@@ -174,7 +174,7 @@ function EvaluationPage() {
       </section>
 
       {/* Filters */}
-      <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000] grid grid-cols-1 md:grid-cols-4 gap-4">
+      <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000] grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
         <div className="space-y-1.5">
           <Label className="font-mono text-[10px] uppercase tracking-[0.2em] flex items-center gap-1">
             <Filter className="h-3 w-3" /> Zóna (Z)
