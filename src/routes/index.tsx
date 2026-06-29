@@ -144,13 +144,10 @@ function PlannerPage() {
             >
               <div className="flex items-center justify-between bg-secondary text-secondary-foreground px-4 py-2">
                 <div className="font-display text-xl tracking-wider">
-                  Týden {w.weekIndexInMonth}
+                  KW {w.weekNumber}
                 </div>
                 <div className="font-mono text-xs uppercase tracking-wider text-primary flex items-center gap-2">
-                  <span className={`px-2 py-0.5 ${isCurrentWeek ? "bg-primary text-ink" : ""}`}>
-                    KW {w.weekNumber}
-                  </span>
-                  <span>· {formatDateCs(w.start)} – {formatDateCs(w.end)} · {w.days.reduce((n, d) => n + d.assignments.length, 0)} auditů</span>
+                  <span>{formatDateCs(w.start)} – {formatDateCs(w.end)} · {w.days.reduce((n, d) => n + d.assignments.length, 0)} auditů</span>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-5">
