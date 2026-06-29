@@ -7,7 +7,9 @@ import {
   MapPin,
   CalendarCheck2,
   Maximize2,
+  Check,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +19,8 @@ import {
 } from "@/lib/scheduler";
 import { useAuditorsStore } from "@/lib/auditors-store";
 import { useZonesStore } from "@/lib/zones-store";
+import { supabase } from "@/integrations/supabase/client";
+
 
 
 export const Route = createFileRoute("/")({
