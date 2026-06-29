@@ -298,6 +298,11 @@ export const MONTH_NAMES_CS = [
   "červenec", "srpen", "září", "říjen", "listopad", "prosinec",
 ];
 
+export const MONTH_SHORT_NAMES_CS = [
+  "led", "úno", "bře", "dub", "kvě", "čer",
+  "čvc", "srp", "zář", "říj", "lis", "pros",
+];
+
 export function formatDateCs(iso: string): string {
   const [y, m, d] = iso.split("-").map(Number);
   return `${d}. ${m}. ${y}`;
