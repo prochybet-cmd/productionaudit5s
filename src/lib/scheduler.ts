@@ -154,6 +154,8 @@ export interface WeekBucket {
 export interface DayBucket {
   date: string;
   weekday: string;
+  isHoliday: boolean;
+  holidayName?: string;
   assignments: AuditAssignment[];
 }
 
