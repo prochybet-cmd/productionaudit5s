@@ -7,7 +7,9 @@ import {
   MapPin,
   CalendarCheck2,
   Maximize2,
+  Check,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +19,8 @@ import {
 } from "@/lib/scheduler";
 import { useAuditorsStore } from "@/lib/auditors-store";
 import { useZonesStore } from "@/lib/zones-store";
+import { supabase } from "@/integrations/supabase/client";
+
 
 
 export const Route = createFileRoute("/")({
@@ -41,7 +45,6 @@ export const Route = createFileRoute("/")({
 function PlannerPage() {
   const today = new Date();
   const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-  // Plánujeme celý červenec 2026 (KW27 obsahuje 29.–30. 6. jako součást července).
   const [year, setYear] = useState(2026);
   const [month, setMonth] = useState(6); // 0-based → červenec
   const { active: zones } = useZonesStore();
@@ -49,11 +52,31 @@ function PlannerPage() {
 
   const [expanded, setExpanded] = useState<string | null>(null);
 
-
   const plan = useMemo(
     () => generatePlan({ year, month, zones, auditors }),
     [year, month, zones, auditors],
   );
+
+  const { data: completedAudits } = useQuery({
+    queryKey: ["audits-for-plan", year, month],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("audits")
+        .select("zone, audit_date")
+        .gte("audit_date", `${year}-${String(month + 1).padStart(2, "0")}-01`)
+        .lt("audit_date", `${month === 11 ? year + 1 : year}-${String(month === 11 ? 1 : month + 2).padStart(2, "0")}-01`);
+      if (error) throw error;
+      return data as { zone: string; audit_date: string }[];
+    },
+  });
+
+  const completedKeySet = useMemo(() => {
+    const set = new Set<string>();
+    for (const a of completedAudits ?? []) {
+      set.add(`${a.audit_date}|${a.zone}`);
+    }
+    return set;
+  }, [completedAudits]);
 
   const goto = (delta: number) => {
     const d = new Date(year, month + delta, 1);
@@ -67,13 +90,12 @@ function PlannerPage() {
 
   const currentWeek = plan.weeks.find((w) => w.days.some((d) => d.date === todayIso));
   const showTodayHighlight = Boolean(currentWeek);
-  // Skryj uplynulé týdny, pokud aktuální datum spadá do tohoto plánu.
   const visibleWeeks = showTodayHighlight
     ? plan.weeks.filter((w) => w.end >= todayIso)
     : plan.weeks;
 
-  // Počítadlo provedených auditů = audity s datem před dneškem.
-  const completedAudits = plan.assignments.filter((a) => a.date < todayIso).length;
+  const completedCount = plan.assignments.filter((a) => a.date < todayIso).length;
+
 
 
   return (
@@ -115,7 +137,7 @@ function PlannerPage() {
 
       {/* KPI strip */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiCard icon={CalendarCheck2} label="Provedených auditů" value={`${completedAudits}/${totalAudits}`} />
+        <KpiCard icon={CalendarCheck2} label="Provedených auditů" value={`${completedCount}/${totalAudits}`} />
         <KpiCard icon={MapPin} label="Zón v plánu" value={`${zonesCovered}/${zones.length}`} />
         <KpiCard icon={Users} label="Auditorů nasazeno" value={`${auditorsUsed}/${allAuditors.length}`} />
         <KpiCard icon={CalendarCheck2} label="Pracovních týdnů" value={plan.weeks.length} />
@@ -176,6 +198,7 @@ function PlannerPage() {
                           {d.assignments.map((a, i) => {
                             const key = `${a.date}-${i}`;
                             const isExpanded = expanded === key;
+                            const isCompleted = completedKeySet.has(`${a.date}|${a.zone}`);
                             const [zoneCode, zoneName] = a.zone.includes(" — ")
                               ? a.zone.split(" — ")
                               : [a.zone, ""];
@@ -183,7 +206,7 @@ function PlannerPage() {
                               <li
                                 key={i}
                                 onClick={() => setExpanded(isExpanded ? null : key)}
-                                className={`border-l-4 px-2 py-1.5 cursor-pointer transition-all ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"} ${isExpanded ? "py-3" : ""}`}
+                                className={`border-l-4 px-2 py-1.5 cursor-pointer transition-all ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"} ${isExpanded ? "py-3" : ""} ${isCompleted ? "ring-2 ring-emerald-500/60" : ""}`}
                                 title="Klikni pro zvětšení zóny"
                               >
                                 {isExpanded ? (
@@ -192,7 +215,14 @@ function PlannerPage() {
                                       <span className="font-display text-2xl tracking-wider text-ink leading-none">
                                         {zoneCode}
                                       </span>
-                                      <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                      <div className="flex items-center gap-1">
+                                        {isCompleted && (
+                                          <span className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-wider bg-emerald-500 text-white px-1.5 py-0.5">
+                                            <Check className="h-3 w-3" /> Auditován
+                                          </span>
+                                        )}
+                                        <Maximize2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                      </div>
                                     </div>
                                     {zoneName && (
                                       <div className="text-sm font-medium text-ink leading-tight">
@@ -205,8 +235,15 @@ function PlannerPage() {
                                   </div>
                                 ) : (
                                   <>
-                                    <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground truncate">
-                                      {a.zone}
+                                    <div className="flex items-center justify-between gap-1">
+                                      <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground truncate">
+                                        {a.zone}
+                                      </div>
+                                      {isCompleted && (
+                                        <span className="inline-flex items-center justify-center rounded-full bg-emerald-500 text-white p-0.5" title="Audit uložen v archivu">
+                                          <Check className="h-3 w-3" />
+                                        </span>
+                                      )}
                                     </div>
                                     <div className="text-sm font-medium truncate">
                                       {a.auditor}
