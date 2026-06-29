@@ -38,7 +38,6 @@ function AuditorPage() {
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
-  const [query, setQuery] = useState("");
   const [confirmed, setConfirmed] = useState<string | null>(null);
 
   const goto = (delta: number) => {
@@ -51,12 +50,6 @@ function AuditorPage() {
     () => generatePlan({ year, month }),
     [year, month],
   );
-
-  const suggestions = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    return DEFAULT_AUDITORS.filter((n) => n.toLowerCase().includes(q)).slice(0, 6);
-  }, [query]);
 
   const mine = useMemo(() => {
     if (!confirmed) return [];
