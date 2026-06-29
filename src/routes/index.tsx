@@ -46,6 +46,8 @@ function PlannerPage() {
   const [month, setMonth] = useState(6); // 0-based → červenec
   const { active: zones } = useZonesStore();
   const { active: auditors } = useAuditorsStore();
+  const [expanded, setExpanded] = useState<string | null>(null);
+
 
   const plan = useMemo(
     () => generatePlan({ year, month, zones, auditors }),
