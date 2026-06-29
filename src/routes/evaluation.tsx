@@ -367,19 +367,12 @@ function EvaluationPage() {
               </div>
             </div>
 
-            {/* Score legend (0–5 bands) */}
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-1 mt-5 text-[10px] font-mono print-legend">
-              {[
-                { n: 0, color: "#f44336", label: "Nebylo zahájeno" },
-                { n: 1, color: "#f44336", label: "Aktivita zahájena" },
-                { n: 2, color: "#ff9800", label: "Rozšířená aktivita" },
-                { n: 3, color: "#ffeb3b", label: "Min. přijatelná úroveň" },
-                { n: 4, color: "#8bc34a", label: "Best in class" },
-                { n: 5, color: "#2196f3", label: "Best Practice / World Class" },
-              ].map((l) => (
-                <div key={l.n} className="border-2 border-ink p-1.5 text-center" style={{ background: l.color }}>
-                  <div className="text-base font-bold leading-tight">{l.n}</div>
-                  <div className="leading-tight">{l.label}</div>
+            {/* Score legend (0–5) — same scale as the checklist */}
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-0 mt-5 text-[10px] font-mono print-legend border-2 border-ink">
+              {SCORE_LEGEND.map((s, i) => (
+                <div key={s.value} className={`${s.bg} ${s.fg} p-3 text-center ${i > 0 ? "border-l-2 border-ink" : ""}`}>
+                  <div className="font-display text-3xl leading-none">{s.value}</div>
+                  <div className="font-bold uppercase tracking-wider mt-1 opacity-90">{s.label}</div>
                 </div>
               ))}
             </div>
