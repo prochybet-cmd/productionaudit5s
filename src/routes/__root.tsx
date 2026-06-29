@@ -23,6 +23,7 @@ import "@fontsource/jetbrains-mono/500.css";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteHeader } from "@/components/site-header";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -137,6 +138,7 @@ function RootComponent() {
           Lean Manufacturing · IATF mindset · 5S
         </footer>
       </div>
+      <Toaster />
     </QueryClientProvider>
   );
 }

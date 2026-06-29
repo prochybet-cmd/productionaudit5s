@@ -1,10 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ClipboardCheck, Printer, RotateCcw, CheckCircle2 } from "lucide-react";
+import { ClipboardCheck, Printer, RotateCcw, CheckCircle2, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
 import {
   CHECKLIST,
   MAX_TOTAL,
@@ -12,6 +13,7 @@ import {
   scoreLabel,
 } from "@/lib/checklist";
 import { DEFAULT_AUDITORS, DEFAULT_ZONES } from "@/lib/scheduler";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/checklist")({
   head: () => ({
@@ -42,10 +44,13 @@ function todayIso() {
 }
 
 function ChecklistPage() {
+  const navigate = useNavigate();
   const [zone, setZone] = useState<string>(DEFAULT_ZONES[0]);
   const [auditor, setAuditor] = useState<string>(DEFAULT_AUDITORS[0]);
   const [date, setDate] = useState<string>(todayIso());
+  const [overallNote, setOverallNote] = useState<string>("");
   const [notes, setNotes] = useState<Record<number, string>>({});
+  const [saving, setSaving] = useState(false);
   const [scores, setScores] = useState<Scores>(() => {
     const init: Scores = {};
     for (const cat of CHECKLIST) for (const it of cat.items) init[it.id] = null;
@@ -69,12 +74,54 @@ function ChecklistPage() {
   const filledCount = Object.values(scores).filter((v) => v !== null).length;
   const completion = Math.round((filledCount / (5 * 5)) * 100);
   const totalPct = Math.round((total / MAX_TOTAL) * 100);
+  const allFilled = filledCount === 25;
 
   const reset = () => {
     const init: Scores = {};
     for (const cat of CHECKLIST) for (const it of cat.items) init[it.id] = null;
     setScores(init);
     setNotes({});
+    setOverallNote("");
+  };
+
+  const saveToArchive = async () => {
+    if (!allFilled) {
+      toast.error("Vyplňte všech 25 položek před uložením.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const { data: audit, error: e1 } = await supabase
+        .from("audits")
+        .insert({
+          zone, auditor, audit_date: date,
+          total_score: total, max_score: MAX_TOTAL,
+          note: overallNote || null,
+        })
+        .select()
+        .single();
+      if (e1 || !audit) throw e1 ?? new Error("Insert failed");
+
+      const rows = CHECKLIST.flatMap((cat) =>
+        cat.items.map((it) => ({
+          audit_id: audit.id,
+          item_id: it.id,
+          category: cat.key,
+          score: scores[it.id] ?? 0,
+          note: notes[it.id] || null,
+        })),
+      );
+      const { error: e2 } = await supabase.from("audit_scores").insert(rows);
+      if (e2) throw e2;
+
+      toast.success("Audit byl uložen do archivu.");
+      navigate({ to: "/archive" });
+    } catch (err) {
+      console.error(err);
+      toast.error("Uložení selhalo. Zkuste to znovu.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -97,8 +144,16 @@ function ChecklistPage() {
           <Button variant="outline" onClick={reset} className="gap-2">
             <RotateCcw className="h-4 w-4" /> Vyčistit
           </Button>
-          <Button onClick={() => window.print()} className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90">
+          <Button variant="outline" onClick={() => window.print()} className="gap-2">
             <Printer className="h-4 w-4" /> Tisk / PDF
+          </Button>
+          <Button
+            onClick={saveToArchive}
+            disabled={saving || !allFilled}
+            className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+          >
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            Uložit do archivu
           </Button>
         </div>
       </section>
@@ -235,6 +290,16 @@ function ChecklistPage() {
           </section>
         );
       })}
+
+      <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000] space-y-2 print:hidden">
+        <Label className="font-mono text-[10px] uppercase tracking-[0.2em]">Celková poznámka k auditu (volitelné)</Label>
+        <Textarea
+          value={overallNote}
+          onChange={(e) => setOverallNote(e.target.value)}
+          rows={3}
+          placeholder="Souhrnné připomínky, opatření, follow-up..."
+        />
+      </section>
 
       <section className="border-2 border-ink bg-secondary text-secondary-foreground p-5 flex flex-wrap items-center justify-between gap-4 print:hidden">
         <div>
