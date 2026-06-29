@@ -94,7 +94,7 @@ function PlannerPage() {
     ? plan.weeks.filter((w) => w.end >= todayIso)
     : plan.weeks;
 
-  const completedAudits = plan.assignments.filter((a) => a.date < todayIso).length;
+  const completedCount = plan.assignments.filter((a) => a.date < todayIso).length;
 
 
 
