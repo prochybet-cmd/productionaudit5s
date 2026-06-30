@@ -72,24 +72,53 @@ function AuditorPage() {
       .slice(0, 5);
   }, [confirmed, rollingAssignments, todayIso]);
 
+  // Draft buffer — changes don't persist (and don't reshuffle the plan)
+  // until the user clicks "Uložit". This prevents accidental edits from
+  // shifting the deterministic schedule and breaking green-checkmark matches
+  // on already-completed audits.
+  const [draftAll, setDraftAll] = useState<string[]>(all);
+  const [draftActive, setDraftActive] = useState<string[]>(active);
+
+  // Sync draft when external store changes (e.g. another tab / first load).
+  useEffect(() => {
+    setDraftAll(all);
+    setDraftActive(active);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [all.join("|"), active.join("|")]);
+
+  const isDirty =
+    draftAll.join("|") !== all.join("|") || draftActive.join("|") !== active.join("|");
+
   const toggle = (name: string, checked: boolean) => {
-    const next = checked
-      ? [...active, name].filter((n, i, arr) => arr.indexOf(n) === i)
-      : active.filter((n) => n !== name);
-    save({ all, active: next });
+    setDraftActive((prev) =>
+      checked ? Array.from(new Set([...prev, name])) : prev.filter((n) => n !== name),
+    );
   };
 
   const addAuditor = () => {
     const name = newName.trim();
-    if (!name || all.includes(name)) return;
-    save({ all: [...all, name], active: [...active, name] });
+    if (!name || draftAll.includes(name)) return;
+    setDraftAll((prev) => [...prev, name]);
+    setDraftActive((prev) => [...prev, name]);
     setNewName("");
   };
 
   const removeAuditor = (name: string) => {
-    save({ all: all.filter((n) => n !== name), active: active.filter((n) => n !== name) });
+    setDraftAll((prev) => prev.filter((n) => n !== name));
+    setDraftActive((prev) => prev.filter((n) => n !== name));
     if (confirmed === name) setConfirmed(null);
   };
+
+  const handleSave = () => {
+    save({ all: draftAll, active: draftActive.length ? draftActive : draftAll });
+    toast.success("Nastavení auditorů uloženo");
+  };
+
+  const handleReset = () => {
+    setDraftAll(all);
+    setDraftActive(active);
+  };
+
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10 space-y-8">
