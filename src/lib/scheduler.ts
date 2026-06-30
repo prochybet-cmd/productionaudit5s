@@ -42,7 +42,38 @@ export const DEFAULT_AUDITORS: string[] = [
   "K Rajchl (KRA)",
   "Y Starynin (YST)",
   "K Lévai (KLE)",
+  "P Škorupka (PSK)",
 ];
+
+// Eligibility — supervizoři mohou všude, ostatní pouze do svých zón.
+export const SUPERVISOR_CODES = ["VTY", "RGA", "MJA", "JSU", "JJI", "RVO"];
+const Z1_CODES = ["KRA", "MMO", "KGE", "RPR", "LMI", "KLE"];
+const Z2_CODES = ["YST", "RMA", "MNO"];
+const Z3_CODES = ["PSK", "SOS", "DDA", "RKO"];
+
+export const ZONE_GROUP_ELIGIBILITY: Record<"Z1" | "Z2" | "Z3", string[]> = {
+  Z1: [...SUPERVISOR_CODES, ...Z1_CODES],
+  Z2: [...SUPERVISOR_CODES, ...Z2_CODES],
+  Z3: [...SUPERVISOR_CODES, ...Z3_CODES],
+};
+
+function auditorCode(name: string): string {
+  const m = name.match(/\(([^)]+)\)\s*$/);
+  return m ? m[1] : name;
+}
+
+function zoneGroup(zone: string): "Z1" | "Z2" | "Z3" {
+  const m = zone.match(/^L(\d+)/);
+  const n = m ? parseInt(m[1], 10) : 0;
+  if ([1, 2, 3, 4].includes(n)) return "Z2";
+  if ([5, 6, 11, 12].includes(n)) return "Z3";
+  return "Z1"; // L7,L8,L9,L10
+}
+
+export function isEligible(auditor: string, zone: string): boolean {
+  return ZONE_GROUP_ELIGIBILITY[zoneGroup(zone)].includes(auditorCode(auditor));
+}
+
 
 // České státní svátky (rozšiřitelné)
 export const HOLIDAYS: Record<string, string> = {
