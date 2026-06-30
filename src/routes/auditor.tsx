@@ -234,17 +234,19 @@ function AuditorPage() {
               <h2 className="font-display text-2xl tracking-wider">Správa auditorů</h2>
             </div>
             <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              {active.length}/{all.length} aktivních
+              {draftActive.length}/{draftAll.length} aktivních
+              {isDirty && <span className="ml-2 text-primary">• neuložené změny</span>}
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Odškrtni auditora (např. dlouhodobá nemoc) — vyjme se z plánování. Změny se ihned
-            promítnou do karty <strong>Plán</strong>.
+            Odškrtni auditora (např. dlouhodobá nemoc) — vyjme se z plánování. Změny se projeví
+            <strong> až po kliknutí na Uložit</strong>, aby se nerozhodil plán a označení už
+            provedených auditů.
           </p>
 
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {all.map((name) => {
-              const checked = active.includes(name);
+            {draftAll.map((name) => {
+              const checked = draftActive.includes(name);
               return (
                 <li
                   key={name}
@@ -281,11 +283,32 @@ function AuditorPage() {
               }}
               className="border-2 font-mono"
             />
-            <Button onClick={addAuditor} className="bg-primary text-primary-foreground hover:bg-primary/90 gap-1">
+            <Button onClick={addAuditor} variant="outline" className="gap-1 border-2">
               <Plus className="h-4 w-4" />
               Přidat
             </Button>
           </div>
+
+          <div className="flex gap-2 pt-3 border-t-2 border-ink">
+            <Button
+              onClick={handleSave}
+              disabled={!isDirty}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 flex-1 h-11 font-display tracking-wider"
+            >
+              <Save className="h-4 w-4" />
+              Uložit nastavení
+            </Button>
+            <Button
+              onClick={handleReset}
+              disabled={!isDirty}
+              variant="outline"
+              className="border-2 gap-2 h-11"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Zahodit
+            </Button>
+          </div>
+
         </section>
       </AdminLockSection>
     </div>
