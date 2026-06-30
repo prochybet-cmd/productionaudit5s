@@ -58,14 +58,17 @@ function PlannerPage() {
     [year, month, zones, auditors],
   );
 
+  // Fetch audits covering the full span of visible weeks (weeks may spill across months).
+  const rangeStart = plan.weeks[0]?.start ?? `${year}-01-01`;
+  const rangeEnd = plan.weeks[plan.weeks.length - 1]?.end ?? `${year}-12-31`;
   const { data: completedAudits } = useQuery({
-    queryKey: ["audits-for-plan", year, month],
+    queryKey: ["audits-for-plan", rangeStart, rangeEnd],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("audits")
         .select("zone, auditor, audit_date")
-        .gte("audit_date", `${year}-${String(month + 1).padStart(2, "0")}-01`)
-        .lt("audit_date", `${month === 11 ? year + 1 : year}-${String(month === 11 ? 1 : month + 2).padStart(2, "0")}-01`);
+        .gte("audit_date", rangeStart)
+        .lte("audit_date", rangeEnd);
       if (error) throw error;
       return data as { zone: string; auditor: string; audit_date: string }[];
     },
