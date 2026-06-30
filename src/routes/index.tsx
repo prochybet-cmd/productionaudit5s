@@ -66,27 +66,29 @@ function PlannerPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("audits")
-        .select("zone, auditor, audit_date")
+        .select("id, zone, auditor, audit_date, created_at")
         .gte("audit_date", rangeStart)
-        .lte("audit_date", rangeEnd);
+        .lte("audit_date", rangeEnd)
+        .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as { zone: string; auditor: string; audit_date: string }[];
+      return data as { id: string; zone: string; auditor: string; audit_date: string; created_at: string }[];
     },
   });
 
-  // Map weekNumber -> Set of "zone|auditor" audited in that week
-  const completedByWeek = useMemo(() => {
-    const map = new Map<number, Set<string>>();
-    for (const w of plan.weeks) map.set(w.weekNumber, new Set());
+  // Map weekNumber -> ("zone|auditor" -> archive audit id) audited in that week.
+  const completedAuditByWeek = useMemo(() => {
+    const map = new Map<number, Map<string, string>>();
+    for (const w of plan.weeks) map.set(w.weekNumber, new Map());
     for (const a of completedAudits ?? []) {
       const w = plan.weeks.find((wk) => a.audit_date >= wk.start && a.audit_date <= wk.end);
-      if (w) map.get(w.weekNumber)!.add(`${a.zone}|${a.auditor}`);
+      const key = `${a.zone}|${a.auditor}`;
+      if (w && !map.get(w.weekNumber)!.has(key)) map.get(w.weekNumber)!.set(key, a.id);
     }
     return map;
   }, [completedAudits, plan.weeks]);
 
-  const isAssignmentCompleted = (weekNumber: number, zone: string, auditor: string) =>
-    completedByWeek.get(weekNumber)?.has(`${zone}|${auditor}`) ?? false;
+  const getCompletedAuditId = (weekNumber: number, zone: string, auditor: string) =>
+    completedAuditByWeek.get(weekNumber)?.get(`${zone}|${auditor}`);
 
 
   const goto = (delta: number) => {
@@ -107,7 +109,7 @@ function PlannerPage() {
 
   const completedCount = plan.assignments.filter((a) => {
     const w = plan.weeks.find((wk) => a.date >= wk.start && a.date <= wk.end);
-    return w ? isAssignmentCompleted(w.weekNumber, a.zone, a.auditor) : false;
+    return w ? Boolean(getCompletedAuditId(w.weekNumber, a.zone, a.auditor)) : false;
   }).length;
 
 
@@ -212,7 +214,8 @@ function PlannerPage() {
                           {d.assignments.map((a, i) => {
                             const key = `${a.date}-${i}`;
                             const isExpanded = expanded === key;
-                            const isCompleted = isAssignmentCompleted(w.weekNumber, a.zone, a.auditor);
+                            const completedAuditId = getCompletedAuditId(w.weekNumber, a.zone, a.auditor);
+                            const isCompleted = Boolean(completedAuditId);
                             const weekEnded = todayIso > w.end;
                             const isMissed = !isCompleted && weekEnded;
                             const [zoneCode, zoneName] = a.zone.includes(" — ")
@@ -221,11 +224,29 @@ function PlannerPage() {
                             return (
                               <li
                                 key={i}
-                                onClick={() => setExpanded(isExpanded ? null : key)}
-                                className={`border-l-4 px-2 py-1.5 cursor-pointer transition-all ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"} ${isExpanded ? "py-3" : ""}`}
-                                title="Klikni pro zvětšení zóny"
+                                onClick={isCompleted ? undefined : () => setExpanded(isExpanded ? null : key)}
+                                className={`border-l-4 px-2 py-1.5 transition-all ${isCompleted ? "cursor-pointer hover:bg-emerald-500/15" : "cursor-pointer"} ${isToday ? "border-ink bg-primary/50" : "border-primary bg-accent/40"} ${isExpanded && !isCompleted ? "py-3" : ""}`}
+                                title={isCompleted ? "Klikni pro otevření detailu auditu v archivu" : "Klikni pro zvětšení zóny"}
                               >
-                                {isExpanded ? (
+                                {isCompleted && completedAuditId ? (
+                                  <Link
+                                    to="/archive/$id"
+                                    params={{ id: completedAuditId }}
+                                    className="block -mx-2 -my-1.5 px-2 py-1.5"
+                                  >
+                                    <div className="flex items-center justify-between gap-1">
+                                      <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground truncate">
+                                        {a.zone}
+                                      </div>
+                                      <span className="inline-flex items-center justify-center rounded-full bg-emerald-500 text-white p-0.5" title="Otevřít audit v archivu">
+                                        <Check className="h-3 w-3" />
+                                      </span>
+                                    </div>
+                                    <div className="text-sm font-medium truncate">
+                                      {a.auditor}
+                                    </div>
+                                  </Link>
+                                ) : isExpanded ? (
                                   <div className="space-y-0.5">
                                     <div className="flex items-center justify-between">
                                       <span className="font-display text-2xl tracking-wider text-ink leading-none">
