@@ -42,7 +42,38 @@ export const DEFAULT_AUDITORS: string[] = [
   "K Rajchl (KRA)",
   "Y Starynin (YST)",
   "K Lévai (KLE)",
+  "P Škorupka (PSK)",
 ];
+
+// Eligibility — supervizoři mohou všude, ostatní pouze do svých zón.
+export const SUPERVISOR_CODES = ["VTY", "RGA", "MJA", "JSU", "JJI", "RVO"];
+const Z1_CODES = ["KRA", "MMO", "KGE", "RPR", "LMI", "KLE"];
+const Z2_CODES = ["YST", "RMA", "MNO"];
+const Z3_CODES = ["PSK", "SOS", "DDA", "RKO"];
+
+export const ZONE_GROUP_ELIGIBILITY: Record<"Z1" | "Z2" | "Z3", string[]> = {
+  Z1: [...SUPERVISOR_CODES, ...Z1_CODES],
+  Z2: [...SUPERVISOR_CODES, ...Z2_CODES],
+  Z3: [...SUPERVISOR_CODES, ...Z3_CODES],
+};
+
+function auditorCode(name: string): string {
+  const m = name.match(/\(([^)]+)\)\s*$/);
+  return m ? m[1] : name;
+}
+
+function zoneGroup(zone: string): "Z1" | "Z2" | "Z3" {
+  const m = zone.match(/^L(\d+)/);
+  const n = m ? parseInt(m[1], 10) : 0;
+  if ([1, 2, 3, 4].includes(n)) return "Z2";
+  if ([5, 6, 11, 12].includes(n)) return "Z3";
+  return "Z1"; // L7,L8,L9,L10
+}
+
+export function isEligible(auditor: string, zone: string): boolean {
+  return ZONE_GROUP_ELIGIBILITY[zoneGroup(zone)].includes(auditorCode(auditor));
+}
+
 
 // České státní svátky (rozšiřitelné)
 export const HOLIDAYS: Record<string, string> = {
@@ -190,94 +221,85 @@ function generateRawMonthPlan(input: Required<PlanInput>): MonthlyPlan {
   const A = auditors.length;
 
   const days = workdaysOfMonth(input.year, input.month);
-
-  // Group workdays by ISO week, preserving order.
-  const orderedWeeks = groupWorkdaysByIsoWeek(days); // [weekNo, dates][]
+  const orderedWeeks = groupWorkdaysByIsoWeek(days);
 
   const assignments: AuditAssignment[] = [];
   // Track zones each auditor has already audited this month (rotation rule)
   const auditorHistory: Set<string>[] = auditors.map(() => new Set());
 
+  // Precompute eligible auditor indices per zone
+  const eligibleByZone: number[][] = zones.map((z) =>
+    auditors.map((_, i) => i).filter((i) => isEligible(auditors[i], z)),
+  );
+
   orderedWeeks.forEach(([weekNo, dates], wIdx) => {
-    // Build this week's assignment list of length max(Z, A):
-    // 1) ensure each zone covered ≥1×
-    // 2) ensure each auditor used ≥1×
-    const count = Math.max(Z, A);
+    const weekSlots: { zone: number; auditor: number }[] = [];
+    const usedAuditors = new Set<number>();
 
-    // Auditors for this week — rotate by week index.
-    const auditorOrder: number[] = [];
-    for (let i = 0; i < count; i++) {
-      auditorOrder.push((i + wIdx * 5) % A);
-    }
-    // Ensure every auditor appears at least once
-    const seenA = new Set(auditorOrder);
-    if (seenA.size < A) {
-      // Fall back: explicit cover of all auditors first
-      const explicit = Array.from({ length: A }, (_, i) => (i + wIdx) % A);
-      auditorOrder.length = 0;
-      auditorOrder.push(...explicit);
-      // Pad with rotating extras up to count
-      for (let i = A; i < count; i++) {
-        auditorOrder.push((i + wIdx * 3) % A);
-      }
-    }
+    // 1) Cover every zone exactly once with an eligible auditor.
+    //    Prefer auditors who haven't audited this zone this month, then those
+    //    not yet used this week, rotated by week index for variety.
+    for (let zi = 0; zi < Z; zi++) {
+      const zIdx = (zi + wIdx * 7) % Z;
+      const eligible = eligibleByZone[zIdx];
+      if (eligible.length === 0) continue;
 
-    // Zone order — rotate so every zone covered ≥1× and rotates across weeks
-    const zoneOrder: number[] = [];
-    for (let i = 0; i < count; i++) {
-      zoneOrder.push((i + wIdx * 7) % Z);
-    }
-    // Ensure every zone covered
-    const seenZ = new Set(zoneOrder.slice(0, Z));
-    if (seenZ.size < Z) {
-      for (let i = 0; i < Z; i++) zoneOrder[i] = (i + wIdx) % Z;
+      const notRepeated = eligible.filter(
+        (i) => !auditorHistory[i].has(zones[zIdx]),
+      );
+      const pool1 = notRepeated.length ? notRepeated : eligible;
+      const notUsedThisWeek = pool1.filter((i) => !usedAuditors.has(i));
+      const pool2 = notUsedThisWeek.length ? notUsedThisWeek : pool1;
+
+      const pick = pool2[(zi + wIdx * 3) % pool2.length];
+      weekSlots.push({ zone: zIdx, auditor: pick });
+      usedAuditors.add(pick);
+      auditorHistory[pick].add(zones[zIdx]);
     }
 
-    // Avoid auditor-repeats-same-zone-this-month: swap zones within week if conflict.
-    for (let i = 0; i < count; i++) {
-      const aIdx = auditorOrder[i];
-      let zIdx = zoneOrder[i];
-      if (auditorHistory[aIdx].has(zones[zIdx])) {
-        // Try to find another slot in this week to swap with
-        for (let j = 0; j < count; j++) {
-          if (j === i) continue;
-          const aJ = auditorOrder[j];
-          const zJ = zoneOrder[j];
-          if (
-            !auditorHistory[aIdx].has(zones[zJ]) &&
-            !auditorHistory[aJ].has(zones[zIdx])
-          ) {
-            zoneOrder[i] = zJ;
-            zoneOrder[j] = zIdx;
-            zIdx = zJ;
-            break;
-          }
-        }
-      }
+    // 2) Ensure every auditor gets ≥1 audit this week — give unused
+    //    auditors an extra slot in an eligible zone (preferably one they
+    //    haven't done yet this month).
+    for (let ai = 0; ai < A; ai++) {
+      const aIdx = (ai + wIdx) % A;
+      if (usedAuditors.has(aIdx)) continue;
+      const eligibleZones = zones
+        .map((_, i) => i)
+        .filter((zi) => isEligible(auditors[aIdx], zones[zi]));
+      if (eligibleZones.length === 0) continue;
+      const fresh = eligibleZones.filter(
+        (zi) => !auditorHistory[aIdx].has(zones[zi]),
+      );
+      const pool = fresh.length ? fresh : eligibleZones;
+      const zIdx = pool[(ai + wIdx) % pool.length];
+      weekSlots.push({ zone: zIdx, auditor: aIdx });
+      usedAuditors.add(aIdx);
       auditorHistory[aIdx].add(zones[zIdx]);
     }
 
-    // Distribute assignments evenly across this week's workdays (Mon–Pá), holidays skipped.
+    // 3) Distribute slots evenly across this week's workdays (skip holidays).
     const workDates = dates.filter((d) => !HOLIDAYS[fmtDate(d)]);
     const dayCount = workDates.length || 1;
     const buckets: number[][] = workDates.map(() => []);
-    for (let i = 0; i < count; i++) {
+    weekSlots.forEach((_, i) => {
       buckets[i % dayCount].push(i);
-    }
+    });
 
     workDates.forEach((date, di) => {
       for (const slot of buckets[di]) {
+        const s = weekSlots[slot];
         assignments.push({
           date: fmtDate(date),
           weekday: WEEKDAY_SHORT[date.getDay()],
           weekNumber: weekNo,
           weekIndexInMonth: wIdx + 1,
-          zone: zones[zoneOrder[slot]],
-          auditor: auditors[auditorOrder[slot]],
+          zone: zones[s.zone],
+          auditor: auditors[s.auditor],
         });
       }
     });
   });
+
 
   // Build week → day groupings
   const weeks: WeekBucket[] = orderedWeeks.map(([weekNo, dates], wIdx) => {
