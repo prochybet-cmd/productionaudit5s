@@ -52,6 +52,7 @@ function formatZoneLabel(zoneFilter: string): string {
   return `ZÓNA ${zoneFilter.replace(/^Z/, "")}`;
 }
 
+
 export const Route = createFileRoute("/evaluation")({
   head: () => ({
     meta: [
