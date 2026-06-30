@@ -426,7 +426,7 @@ function EvaluationPage() {
             </div>
           </section>
 
-          <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000]">
+          <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000] no-print">
             <div className="font-display text-2xl tracking-wider mb-2">Trend skóre v čase</div>
             <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-4">
               Průměrné % za měsíc (po aplikaci filtrů)
