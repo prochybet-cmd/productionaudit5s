@@ -409,23 +409,25 @@ function EvaluationPage() {
 
               {/* Side breakdown panel */}
               <div className="space-y-2 print-side">
-                {breakdown.map((b) => (
-                  <div key={b.cs} className="border-2 border-ink">
-                    <div className="bg-primary text-ink text-center font-mono text-xs font-bold py-1 border-b-2 border-ink print-cat-title">
-                      {b.cs}
+                <div className="print-side-inner">
+                  {breakdown.map((b) => (
+                    <div key={b.cs} className="border-2 border-ink">
+                      <div className="bg-primary text-ink text-center font-mono text-xs font-bold py-1 border-b-2 border-ink print-cat-title">
+                        {b.cs}
+                      </div>
+                      <div className="grid grid-cols-2 text-[11px] font-mono">
+                        <div className="px-2 py-0.5 border-b border-ink/30 print-cat-row">Maximální skóre</div>
+                        <div className="px-2 py-0.5 border-b border-ink/30 text-right print-cat-row">{b.maxScore}</div>
+                        <div className="px-2 py-0.5 border-b border-ink/30 print-cat-row">Získané skóre</div>
+                        <div className="px-2 py-0.5 border-b border-ink/30 text-right print-cat-row">{b.gained}</div>
+                        <div className="px-2 py-0.5 border-b border-ink/30 print-cat-row">Hodnocení (Ø)</div>
+                        <div className="px-2 py-0.5 border-b border-ink/30 text-right print-cat-row">{b.avg.toFixed(1)}</div>
+                        <div className="px-2 py-0.5 font-bold print-cat-row">Výsledek</div>
+                        <div className="px-2 py-0.5 text-right font-bold print-cat-row">{b.pct} %</div>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-2 text-[11px] font-mono">
-                      <div className="px-2 py-0.5 border-b border-ink/30 print-cat-row">Maximální skóre</div>
-                      <div className="px-2 py-0.5 border-b border-ink/30 text-right print-cat-row">{b.maxScore}</div>
-                      <div className="px-2 py-0.5 border-b border-ink/30 print-cat-row">Získané skóre</div>
-                      <div className="px-2 py-0.5 border-b border-ink/30 text-right print-cat-row">{b.gained}</div>
-                      <div className="px-2 py-0.5 border-b border-ink/30 print-cat-row">Hodnocení (Ø)</div>
-                      <div className="px-2 py-0.5 border-b border-ink/30 text-right print-cat-row">{b.avg.toFixed(1)}</div>
-                      <div className="px-2 py-0.5 font-bold print-cat-row">Výsledek</div>
-                      <div className="px-2 py-0.5 text-right font-bold print-cat-row">{b.pct} %</div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
 
                 <div className="border-2 border-ink bg-ink text-white print-total mt-1">
                   <div className="text-center font-mono text-sm font-extrabold py-1.5 border-b-2 border-white/40 tracking-wider print-total-title">
