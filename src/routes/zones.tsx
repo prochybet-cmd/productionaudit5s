@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { MapPin, CalendarDays, Factory, Cog, Settings2, Plus, Trash2 } from "lucide-react";
+import { MapPin, CalendarDays, Factory, Cog, Settings2, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   MONTH_NAMES_CS,
+  MONTH_SHORT_NAMES_CS,
   formatDateCs,
   generatePlan,
 } from "@/lib/scheduler";
