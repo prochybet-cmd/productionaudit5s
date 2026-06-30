@@ -27,7 +27,7 @@ export const Route = createFileRoute("/auditor")({
       {
         name: "description",
         content:
-          "Zadej své jméno a uvidíš všechny své 5S audity v aktuálním měsíci: kdy a do jaké zóny.",
+          "Vyber své jméno a zobrazí se ti následujících 5 naplánovaných 5S auditů: kdy a do jaké zóny.",
       },
       { property: "og:title", content: "Najít auditora" },
       { property: "og:description", content: "Vyhledávání plánu auditora podle jména." },
