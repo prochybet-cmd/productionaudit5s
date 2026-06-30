@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { MapPin, ChevronLeft, ChevronRight, Plus, Trash2, Users } from "lucide-react";
+import { MapPin, Plus, Trash2, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  MONTH_NAMES_CS,
   MONTH_SHORT_NAMES_CS,
   formatDateCs,
   generatePlan,
@@ -28,7 +27,7 @@ export const Route = createFileRoute("/auditor")({
       {
         name: "description",
         content:
-          "Zadej své jméno a uvidíš všechny své 5S audity v aktuálním měsíci: kdy a do jaké zóny.",
+          "Vyber své jméno a zobrazí se ti následujících 5 naplánovaných 5S auditů: kdy a do jaké zóny.",
       },
       { property: "og:title", content: "Najít auditora" },
       { property: "og:description", content: "Vyhledávání plánu auditora podle jména." },
@@ -38,30 +37,39 @@ export const Route = createFileRoute("/auditor")({
 });
 
 function AuditorPage() {
-  const today = new Date();
-  const [year, setYear] = useState(today.getFullYear());
-  const [month, setMonth] = useState(today.getMonth());
+  const [today] = useState(() => new Date());
   const [confirmed, setConfirmed] = useState<string | null>(null);
 
   const { all, active, save } = useAuditorsStore();
   const [newName, setNewName] = useState("");
 
-  const goto = (delta: number) => {
-    const d = new Date(year, month + delta, 1);
-    setYear(d.getFullYear());
-    setMonth(d.getMonth());
-  };
+  // Generate rolling plans across current + next months so we always have
+  // enough upcoming audits for any active auditor.
+  const rollingAssignments = useMemo(() => {
+    const out: ReturnType<typeof generatePlan>["assignments"] = [];
+    const startMonth = today.getMonth();
+    const startYear = today.getFullYear();
+    for (let i = 0; i < 4; i++) {
+      const d = new Date(startYear, startMonth + i, 1);
+      const plan = generatePlan({ year: d.getFullYear(), month: d.getMonth(), auditors: active });
+      out.push(...plan.assignments);
+    }
+    return out;
+  }, [active, today]);
 
-  const plan = useMemo(
-    () => generatePlan({ year, month, auditors: active }),
-    [year, month, active],
+  const todayIso = useMemo(
+    () =>
+      `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`,
+    [today],
   );
 
   const mine = useMemo(() => {
     if (!confirmed) return [];
-    const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-    return plan.assignments.filter((a) => a.auditor === confirmed && a.date >= todayIso);
-  }, [confirmed, plan, today]);
+    return rollingAssignments
+      .filter((a) => a.auditor === confirmed && a.date >= todayIso)
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(0, 5);
+  }, [confirmed, rollingAssignments, todayIso]);
 
   const toggle = (name: string, checked: boolean) => {
     const next = checked
@@ -91,27 +99,8 @@ function AuditorPage() {
           </div>
           <h1 className="font-display text-5xl text-ink mt-1">Kam mám jít?</h1>
           <p className="text-sm text-muted-foreground mt-2">
-            Zadej své jméno a potvrď. Uvidíš všechny své 5S audity v měsíci{" "}
-            <strong>{MONTH_NAMES_CS[month]} {year}</strong>.
+            Vyber své jméno a zobrazí se ti následujících 5 naplánovaných 5S auditů: kdy a do jaké zóny.
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => goto(-1)}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setYear(today.getFullYear());
-              setMonth(today.getMonth());
-            }}
-            className="font-mono uppercase"
-          >
-            Dnes
-          </Button>
-          <Button variant="outline" size="icon" onClick={() => goto(1)}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 
@@ -157,7 +146,7 @@ function AuditorPage() {
 
           {mine.length === 0 ? (
             <div className="border-2 border-dashed border-border p-8 text-center text-muted-foreground">
-              V tomto měsíci nemá tento auditor žádné audity v plánu.
+              Pro tohoto auditora nejsou naplánovány žádné nadcházející audity.
             </div>
           ) : (
             <ul className="space-y-3">
