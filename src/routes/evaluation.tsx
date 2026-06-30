@@ -194,30 +194,38 @@ function EvaluationPage() {
             width: 100% !important;
             height: 100% !important;
             margin: 0 !important;
-            padding: 5mm !important;
+            padding: 4mm !important;
             box-shadow: none !important;
             border: 2px solid #000 !important;
             background: #fff !important;
             overflow: hidden !important;
             page-break-inside: avoid;
+            break-inside: avoid;
           }
           .print-radar .print-grid {
             display: grid !important;
-            grid-template-columns: 1fr 70mm !important;
+            grid-template-columns: 1fr 68mm !important;
             gap: 3mm !important;
             align-items: stretch !important;
           }
-          .print-radar .print-radar-chart { height: 185mm !important; width: 100% !important; }
-          .print-radar .print-legend { margin-top: 3mm !important; }
+          .print-radar .print-radar-chart { height: 155mm !important; width: 100% !important; }
+          .print-radar .print-legend { margin-top: 2mm !important; }
+          .print-radar .print-legend > div { padding: 1mm !important; }
           .print-radar .recharts-wrapper,
           .print-radar .recharts-surface { overflow: visible !important; }
+          /* Compact side breakdown for print */
+          .print-radar .print-side > div { margin-bottom: 1mm !important; }
+          .print-radar .print-side .print-cat-title { font-size: 9px !important; padding: 1px 0 !important; }
+          .print-radar .print-side .print-cat-row { font-size: 9px !important; padding: 0 4px !important; line-height: 1.2 !important; }
           /* Highlight total score block */
           .print-radar .print-total {
             border-width: 3px !important;
+            margin-top: 1mm !important;
           }
-          .print-radar .print-total .print-total-title { font-size: 13px !important; padding: 3px 0 !important; }
-          .print-radar .print-total .print-total-row { font-size: 13px !important; }
-          .print-radar .print-total .print-total-result { font-size: 18px !important; font-weight: 900 !important; }
+          .print-radar .print-total .print-total-title { font-size: 11px !important; padding: 2px 0 !important; }
+          .print-radar .print-total .print-total-row { font-size: 10px !important; padding: 1px 4px !important; }
+          .print-radar .print-total .print-total-result { font-size: 15px !important; font-weight: 900 !important; padding: 2px 4px !important; }
+
         }
       `}</style>
 
