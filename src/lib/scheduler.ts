@@ -367,6 +367,7 @@ function generateRawMonthPlan(input: PlanInput): MonthlyPlan {
 export function generatePlan(input: PlanInput): MonthlyPlan {
   const zones = input.zones ?? DEFAULT_ZONES;
   const auditors = input.auditors ?? DEFAULT_AUDITORS;
+  const auditorInfos = input.auditorInfos;
   const days = workdaysOfMonth(input.year, input.month);
   const orderedWeeks = groupWorkdaysByIsoWeek(days);
   const rawPlanCache = new Map<string, MonthlyPlan>();
@@ -375,7 +376,7 @@ export function generatePlan(input: PlanInput): MonthlyPlan {
     const key = `${year}-${month}`;
     const cached = rawPlanCache.get(key);
     if (cached) return cached;
-    const generated = generateRawMonthPlan({ year, month, zones, auditors });
+    const generated = generateRawMonthPlan({ year, month, zones, auditors, auditorInfos });
     rawPlanCache.set(key, generated);
     return generated;
   };
