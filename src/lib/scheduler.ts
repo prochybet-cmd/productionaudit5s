@@ -12,7 +12,7 @@ export const DEFAULT_ZONES: string[] = [
   "L1 — 730B - svařovna",
   "L2 — XFK - svařovna",
   "L3 — Caddy5 op - svařovna",
-  "L4 — PO416 / VLB - svařovna",
+  "L4 — PPE/C / VLB - svařovna",
   "L5 — C5 PLATE, 730B MO, PPE 40R MO",
   "L6 — PPE 20C, 40L, XFK MO",
   "L7 — PPE 40L svařovna, KEB24 svařovna",

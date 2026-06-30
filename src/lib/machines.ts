@@ -4,7 +4,7 @@
 export interface MachineRow {
   zone: string;     // Z1-A, Z1-B, Z2, Z3, …
   line: string;     // L1, L2, …
-  project: string;  // 730B, XFK, Caddy5, PPE/C, PO416, KEB24, VW275, různé …
+  project: string;  // 730B, XFK, Caddy5, PPE/C, KEB24, VW275, různé …
   machine: string;  // SO040, MO347, PI500 …
 }
 
@@ -25,14 +25,14 @@ export const MACHINES: MachineRow[] = [
   { zone: "Z2", line: "L3", project: "Caddy5", machine: "SO554" },
   { zone: "Z2", line: "L3", project: "Caddy5", machine: "SO550" },
   // Z2 / L4
-  { zone: "Z2", line: "L4", project: "PO416", machine: "SO097" },
-  { zone: "Z2", line: "L4", project: "PO416", machine: "SO176" },
-  { zone: "Z2", line: "L4", project: "PO416", machine: "SO801" },
+  { zone: "Z2", line: "L4", project: "PPE/C", machine: "SO097" },
+  { zone: "Z2", line: "L4", project: "PPE/C", machine: "SO176" },
+  { zone: "Z2", line: "L4", project: "PPE/C", machine: "SO801" },
   { zone: "Z2", line: "L4", project: "730B", machine: "SO775" },
   { zone: "Z2", line: "L4", project: "XFK", machine: "SO707" },
-  { zone: "Z2", line: "L4", project: "PO416", machine: "SO531" },
+  { zone: "Z2", line: "L4", project: "PPE/C", machine: "SO531" },
   { zone: "Z2", line: "L4", project: "Caddy5", machine: "SO555" },
-  { zone: "Z2", line: "L4", project: "PO416", machine: "MO308" },
+  { zone: "Z2", line: "L4", project: "PPE/C", machine: "MO308" },
   // Z3 / L5
   { zone: "Z3", line: "L5", project: "730B", machine: "MO347" },
   { zone: "Z3", line: "L5", project: "PPE/C", machine: "MO352" },
@@ -52,7 +52,7 @@ export const MACHINES: MachineRow[] = [
   { zone: "Z3", line: "L7", project: "Caddy5", machine: "SO556" },
   { zone: "Z3", line: "L7", project: "Caddy5", machine: "SO550" },
   // Z1-A / L7
-  { zone: "Z1-A", line: "L7", project: "PO416", machine: "SO008" },
+  { zone: "Z1-A", line: "L7", project: "PPE/C", machine: "SO008" },
   { zone: "Z1-A", line: "L7", project: "PPE/C", machine: "SO005" },
   { zone: "Z1-A", line: "L7", project: "PPE/C", machine: "SO809" },
   // Z1-A / L8
@@ -71,7 +71,7 @@ export const MACHINES: MachineRow[] = [
   { zone: "Z1-B", line: "L10", project: "PPE/C", machine: "SO041" },
   { zone: "Z1-B", line: "L10", project: "PPE/C", machine: "SO810" },
   { zone: "Z1-B", line: "L10", project: "PPE/C", machine: "SO538" },
-  { zone: "Z1-B", line: "L10", project: "PO416", machine: "SO777" },
+  { zone: "Z1-B", line: "L10", project: "PPE/C", machine: "SO777" },
   { zone: "Z1-B", line: "L10", project: "různé", machine: "PI501" },
   { zone: "Z1-B", line: "L10", project: "PPE/C", machine: "MO356" },
   { zone: "Z1-B", line: "L10", project: "PPE/C", machine: "SO776" },
