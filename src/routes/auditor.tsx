@@ -45,15 +45,24 @@ function AuditorPage() {
   const [newName, setNewName] = useState("");
 
   // Generate rolling plans across current + next months so we always have
-  // enough upcoming audits for any active auditor.
+  // enough upcoming audits for any active auditor. The scheduler includes
+  // complete ISO weeks even when a week overlaps two months, so KW27 can be
+  // present in both June and July plans. Keep the first occurrence only — it
+  // matches the same month/week version shown on the main plan.
   const rollingAssignments = useMemo(() => {
     const out: ReturnType<typeof generatePlan>["assignments"] = [];
+    const seenWeeks = new Set<string>();
     const startMonth = today.getMonth();
     const startYear = today.getFullYear();
     for (let i = 0; i < 4; i++) {
       const d = new Date(startYear, startMonth + i, 1);
       const plan = generatePlan({ year: d.getFullYear(), month: d.getMonth(), auditors: active });
-      out.push(...plan.assignments);
+      for (const week of plan.weeks) {
+        const weekKey = `${week.start}|${week.end}`;
+        if (seenWeeks.has(weekKey)) continue;
+        seenWeeks.add(weekKey);
+        out.push(...week.days.flatMap((day) => day.assignments));
+      }
     }
     return out;
   }, [active, today]);
