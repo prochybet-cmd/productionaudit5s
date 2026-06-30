@@ -63,27 +63,28 @@ function PlannerPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("audits")
-        .select("zone, audit_date")
+        .select("zone, auditor, audit_date")
         .gte("audit_date", `${year}-${String(month + 1).padStart(2, "0")}-01`)
         .lt("audit_date", `${month === 11 ? year + 1 : year}-${String(month === 11 ? 1 : month + 2).padStart(2, "0")}-01`);
       if (error) throw error;
-      return data as { zone: string; audit_date: string }[];
+      return data as { zone: string; auditor: string; audit_date: string }[];
     },
   });
 
-  // Map weekNumber -> Set of zones audited in that week (any day Mon-Sun)
+  // Map weekNumber -> Set of "zone|auditor" audited in that week
   const completedByWeek = useMemo(() => {
     const map = new Map<number, Set<string>>();
     for (const w of plan.weeks) map.set(w.weekNumber, new Set());
     for (const a of completedAudits ?? []) {
       const w = plan.weeks.find((wk) => a.audit_date >= wk.start && a.audit_date <= wk.end);
-      if (w) map.get(w.weekNumber)!.add(a.zone);
+      if (w) map.get(w.weekNumber)!.add(`${a.zone}|${a.auditor}`);
     }
     return map;
   }, [completedAudits, plan.weeks]);
 
-  const isAssignmentCompleted = (weekNumber: number, zone: string) =>
-    completedByWeek.get(weekNumber)?.has(zone) ?? false;
+  const isAssignmentCompleted = (weekNumber: number, zone: string, auditor: string) =>
+    completedByWeek.get(weekNumber)?.has(`${zone}|${auditor}`) ?? false;
+
 
   const goto = (delta: number) => {
     const d = new Date(year, month + delta, 1);
@@ -103,7 +104,7 @@ function PlannerPage() {
 
   const completedCount = plan.assignments.filter((a) => {
     const w = plan.weeks.find((wk) => a.date >= wk.start && a.date <= wk.end);
-    return w ? isAssignmentCompleted(w.weekNumber, a.zone) : false;
+    return w ? isAssignmentCompleted(w.weekNumber, a.zone, a.auditor) : false;
   }).length;
 
 
@@ -208,7 +209,7 @@ function PlannerPage() {
                           {d.assignments.map((a, i) => {
                             const key = `${a.date}-${i}`;
                             const isExpanded = expanded === key;
-                            const isCompleted = isAssignmentCompleted(w.weekNumber, a.zone);
+                            const isCompleted = isAssignmentCompleted(w.weekNumber, a.zone, a.auditor);
                             const weekEnded = todayIso > w.end;
                             const isMissed = !isCompleted && weekEnded;
                             const [zoneCode, zoneName] = a.zone.includes(" — ")
