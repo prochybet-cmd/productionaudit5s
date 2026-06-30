@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Archive, Eye, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/archive")({
+export const Route = createFileRoute("/archive/")({
   head: () => ({
     meta: [
       { title: "Archiv 5S auditů — záznamy" },
