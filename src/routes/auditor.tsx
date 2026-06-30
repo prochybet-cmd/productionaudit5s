@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import { MapPin, Plus, Trash2, Users } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { MapPin, Plus, RotateCcw, Save, Trash2, Users } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,24 +72,53 @@ function AuditorPage() {
       .slice(0, 5);
   }, [confirmed, rollingAssignments, todayIso]);
 
+  // Draft buffer — changes don't persist (and don't reshuffle the plan)
+  // until the user clicks "Uložit". This prevents accidental edits from
+  // shifting the deterministic schedule and breaking green-checkmark matches
+  // on already-completed audits.
+  const [draftAll, setDraftAll] = useState<string[]>(all);
+  const [draftActive, setDraftActive] = useState<string[]>(active);
+
+  // Sync draft when external store changes (e.g. another tab / first load).
+  useEffect(() => {
+    setDraftAll(all);
+    setDraftActive(active);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [all.join("|"), active.join("|")]);
+
+  const isDirty =
+    draftAll.join("|") !== all.join("|") || draftActive.join("|") !== active.join("|");
+
   const toggle = (name: string, checked: boolean) => {
-    const next = checked
-      ? [...active, name].filter((n, i, arr) => arr.indexOf(n) === i)
-      : active.filter((n) => n !== name);
-    save({ all, active: next });
+    setDraftActive((prev) =>
+      checked ? Array.from(new Set([...prev, name])) : prev.filter((n) => n !== name),
+    );
   };
 
   const addAuditor = () => {
     const name = newName.trim();
-    if (!name || all.includes(name)) return;
-    save({ all: [...all, name], active: [...active, name] });
+    if (!name || draftAll.includes(name)) return;
+    setDraftAll((prev) => [...prev, name]);
+    setDraftActive((prev) => [...prev, name]);
     setNewName("");
   };
 
   const removeAuditor = (name: string) => {
-    save({ all: all.filter((n) => n !== name), active: active.filter((n) => n !== name) });
+    setDraftAll((prev) => prev.filter((n) => n !== name));
+    setDraftActive((prev) => prev.filter((n) => n !== name));
     if (confirmed === name) setConfirmed(null);
   };
+
+  const handleSave = () => {
+    save({ all: draftAll, active: draftActive.length ? draftActive : draftAll });
+    toast.success("Nastavení auditorů uloženo");
+  };
+
+  const handleReset = () => {
+    setDraftAll(all);
+    setDraftActive(active);
+  };
+
 
   return (
     <div className="mx-auto max-w-4xl px-6 py-10 space-y-8">
@@ -204,17 +234,19 @@ function AuditorPage() {
               <h2 className="font-display text-2xl tracking-wider">Správa auditorů</h2>
             </div>
             <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              {active.length}/{all.length} aktivních
+              {draftActive.length}/{draftAll.length} aktivních
+              {isDirty && <span className="ml-2 text-primary">• neuložené změny</span>}
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Odškrtni auditora (např. dlouhodobá nemoc) — vyjme se z plánování. Změny se ihned
-            promítnou do karty <strong>Plán</strong>.
+            Odškrtni auditora (např. dlouhodobá nemoc) — vyjme se z plánování. Změny se projeví
+            <strong> až po kliknutí na Uložit</strong>, aby se nerozhodil plán a označení už
+            provedených auditů.
           </p>
 
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {all.map((name) => {
-              const checked = active.includes(name);
+            {draftAll.map((name) => {
+              const checked = draftActive.includes(name);
               return (
                 <li
                   key={name}
@@ -251,11 +283,32 @@ function AuditorPage() {
               }}
               className="border-2 font-mono"
             />
-            <Button onClick={addAuditor} className="bg-primary text-primary-foreground hover:bg-primary/90 gap-1">
+            <Button onClick={addAuditor} variant="outline" className="gap-1 border-2">
               <Plus className="h-4 w-4" />
               Přidat
             </Button>
           </div>
+
+          <div className="flex gap-2 pt-3 border-t-2 border-ink">
+            <Button
+              onClick={handleSave}
+              disabled={!isDirty}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 flex-1 h-11 font-display tracking-wider"
+            >
+              <Save className="h-4 w-4" />
+              Uložit nastavení
+            </Button>
+            <Button
+              onClick={handleReset}
+              disabled={!isDirty}
+              variant="outline"
+              className="border-2 gap-2 h-11"
+            >
+              <RotateCcw className="h-4 w-4" />
+              Zahodit
+            </Button>
+          </div>
+
         </section>
       </AdminLockSection>
     </div>
