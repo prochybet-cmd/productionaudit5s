@@ -209,7 +209,7 @@ function PlannerPage() {
                           {d.assignments.map((a, i) => {
                             const key = `${a.date}-${i}`;
                             const isExpanded = expanded === key;
-                            const isCompleted = isAssignmentCompleted(w.weekNumber, a.zone);
+                            const isCompleted = isAssignmentCompleted(w.weekNumber, a.zone, a.auditor);
                             const weekEnded = todayIso > w.end;
                             const isMissed = !isCompleted && weekEnded;
                             const [zoneCode, zoneName] = a.zone.includes(" — ")
