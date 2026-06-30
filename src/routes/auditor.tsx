@@ -59,8 +59,9 @@ function AuditorPage() {
 
   const mine = useMemo(() => {
     if (!confirmed) return [];
-    return plan.assignments.filter((a) => a.auditor === confirmed);
-  }, [confirmed, plan]);
+    const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    return plan.assignments.filter((a) => a.auditor === confirmed && a.date >= todayIso);
+  }, [confirmed, plan, today]);
 
   const toggle = (name: string, checked: boolean) => {
     const next = checked
@@ -139,6 +140,69 @@ function AuditorPage() {
         </div>
       </div>
 
+
+      {confirmed && (
+        <section className="space-y-4">
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-display text-3xl tracking-wider">
+              {confirmed} — {mine.length} {mine.length === 1 ? "audit" : mine.length < 5 ? "audity" : "auditů"}
+            </h2>
+            <Link
+              to="/"
+              className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            >
+              ← Celý plán
+            </Link>
+          </div>
+
+          {mine.length === 0 ? (
+            <div className="border-2 border-dashed border-border p-8 text-center text-muted-foreground">
+              V tomto měsíci nemá tento auditor žádné audity v plánu.
+            </div>
+          ) : (
+            <ul className="space-y-3">
+              {mine.map((a, i) => (
+                <li
+                  key={i}
+                  className="stamp bg-card p-4 flex flex-wrap items-center gap-4 justify-between"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="bg-primary text-primary-foreground px-3 py-2 text-center min-w-[64px]">
+                      <div className="font-mono text-[10px] uppercase tracking-wider">
+                        {a.weekday}
+                      </div>
+                      <div className="font-display text-2xl leading-none">
+                        {a.date.split("-")[2]}
+                      </div>
+                      <div className="font-mono text-[10px]">
+                        {MONTH_SHORT_NAMES_CS[Number(a.date.split("-")[1]) - 1]}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                        Zóna
+                      </div>
+                      <div className="font-medium text-lg flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        {a.zone}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                      KW {a.weekNumber}
+                    </div>
+                    <div className="font-mono text-xs">
+                      {formatDateCs(a.date)}
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
       {/* Správa auditorů — chráněno heslem pro změny */}
       <AdminLockSection
         title="Správa auditorů"
@@ -205,68 +269,6 @@ function AuditorPage() {
           </div>
         </section>
       </AdminLockSection>
-
-      {confirmed && (
-        <section className="space-y-4">
-          <div className="flex items-baseline justify-between">
-            <h2 className="font-display text-3xl tracking-wider">
-              {confirmed} — {mine.length} {mine.length === 1 ? "audit" : mine.length < 5 ? "audity" : "auditů"}
-            </h2>
-            <Link
-              to="/"
-              className="font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground"
-            >
-              ← Celý plán
-            </Link>
-          </div>
-
-          {mine.length === 0 ? (
-            <div className="border-2 border-dashed border-border p-8 text-center text-muted-foreground">
-              V tomto měsíci nemá tento auditor žádné audity v plánu.
-            </div>
-          ) : (
-            <ul className="space-y-3">
-              {mine.map((a, i) => (
-                <li
-                  key={i}
-                  className="stamp bg-card p-4 flex flex-wrap items-center gap-4 justify-between"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="bg-primary text-primary-foreground px-3 py-2 text-center min-w-[64px]">
-                      <div className="font-mono text-[10px] uppercase tracking-wider">
-                        {a.weekday}
-                      </div>
-                      <div className="font-display text-2xl leading-none">
-                        {a.date.split("-")[2]}
-                      </div>
-                      <div className="font-mono text-[10px]">
-                        {MONTH_SHORT_NAMES_CS[Number(a.date.split("-")[1]) - 1]}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                        Zóna
-                      </div>
-                      <div className="font-medium text-lg flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        {a.zone}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                      KW {a.weekNumber}
-                    </div>
-                    <div className="font-mono text-xs">
-                      {formatDateCs(a.date)}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      )}
     </div>
   );
 }
