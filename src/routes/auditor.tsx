@@ -37,7 +37,7 @@ export const Route = createFileRoute("/auditor")({
 });
 
 function AuditorPage() {
-  const today = new Date();
+  const [today] = useState(() => new Date());
   const [confirmed, setConfirmed] = useState<string | null>(null);
 
   const { all, active, save } = useAuditorsStore();
