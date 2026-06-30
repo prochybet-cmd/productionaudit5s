@@ -51,28 +51,55 @@ const Z1_CODES = ["KRA", "MMO", "KGE", "RPR", "LMI", "KLE"];
 const Z2_CODES = ["YST", "RMA", "MNO"];
 const Z3_CODES = ["PSK", "SOS", "DDA", "RKO"];
 
-export const ZONE_GROUP_ELIGIBILITY: Record<"Z1" | "Z2" | "Z3", string[]> = {
-  Z1: [...SUPERVISOR_CODES, ...Z1_CODES],
-  Z2: [...SUPERVISOR_CODES, ...Z2_CODES],
-  Z3: [...SUPERVISOR_CODES, ...Z3_CODES],
-};
+export type ZoneGroup = "Z1A" | "Z1B" | "Z2" | "Z3";
+export const ALL_ZONE_GROUPS: ZoneGroup[] = ["Z1A", "Z1B", "Z2", "Z3"];
+
+export interface AuditorInfo {
+  name: string;
+  supervisor: boolean;
+  groups: ZoneGroup[];
+}
 
 function auditorCode(name: string): string {
   const m = name.match(/\(([^)]+)\)\s*$/);
   return m ? m[1] : name;
 }
 
-function zoneGroup(zone: string): "Z1" | "Z2" | "Z3" {
+export function defaultInfoFor(name: string): AuditorInfo {
+  const code = auditorCode(name);
+  if (SUPERVISOR_CODES.includes(code))
+    return { name, supervisor: true, groups: [...ALL_ZONE_GROUPS] };
+  if (Z1_CODES.includes(code))
+    return { name, supervisor: false, groups: ["Z1A", "Z1B"] };
+  if (Z2_CODES.includes(code))
+    return { name, supervisor: false, groups: ["Z2"] };
+  if (Z3_CODES.includes(code))
+    return { name, supervisor: false, groups: ["Z3"] };
+  // Nový auditor — defaultně do všech zón, uživatel může upravit.
+  return { name, supervisor: false, groups: [...ALL_ZONE_GROUPS] };
+}
+
+export const DEFAULT_AUDITOR_INFOS: AuditorInfo[] = DEFAULT_AUDITORS.map(defaultInfoFor);
+
+export function zoneGroupOf(zone: string): ZoneGroup {
   const m = zone.match(/^L(\d+)/);
   const n = m ? parseInt(m[1], 10) : 0;
   if ([1, 2, 3, 4].includes(n)) return "Z2";
   if ([5, 6, 11, 12].includes(n)) return "Z3";
-  return "Z1"; // L7,L8,L9,L10
+  if ([9, 10].includes(n)) return "Z1A";
+  return "Z1B"; // L7, L8
 }
 
-export function isEligible(auditor: string, zone: string): boolean {
-  return ZONE_GROUP_ELIGIBILITY[zoneGroup(zone)].includes(auditorCode(auditor));
+export function isEligible(
+  auditor: string,
+  zone: string,
+  infos?: AuditorInfo[],
+): boolean {
+  const g = zoneGroupOf(zone);
+  const info = infos?.find((i) => i.name === auditor) ?? defaultInfoFor(auditor);
+  return info.supervisor || info.groups.includes(g);
 }
+
 
 
 // České státní svátky (rozšiřitelné)
