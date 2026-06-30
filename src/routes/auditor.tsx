@@ -146,7 +146,7 @@ function AuditorPage() {
 
           {mine.length === 0 ? (
             <div className="border-2 border-dashed border-border p-8 text-center text-muted-foreground">
-              V tomto měsíci nemá tento auditor žádné audity v plánu.
+              Pro tohoto auditora nejsou naplánovány žádné nadcházející audity.
             </div>
           ) : (
             <ul className="space-y-3">
