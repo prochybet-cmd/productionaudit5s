@@ -207,26 +207,46 @@ function EvaluationPage() {
           }
           .print-radar .print-grid {
             display: grid !important;
-            grid-template-columns: 1fr 66mm !important;
-            gap: 3mm !important;
+            grid-template-columns: 1fr 70mm !important;
+            gap: 2mm !important;
             align-items: stretch !important;
             flex: 1 1 auto !important;
             min-height: 0 !important;
           }
-          .print-radar .print-radar-chart { height: 138mm !important; width: 100% !important; }
-          .print-radar .print-legend { margin-top: 1.5mm !important; flex-shrink: 0 !important; }
+          .print-radar .print-radar-chart { height: 128mm !important; width: 100% !important; }
+          .print-radar .print-legend { margin-top: 1mm !important; flex-shrink: 0 !important; }
           .print-radar .print-legend > div { padding: 0.8mm !important; }
 
           .print-radar .recharts-wrapper,
           .print-radar .recharts-surface { overflow: visible !important; }
-          /* Compact side breakdown for print */
-          .print-radar .print-side > div { margin-bottom: 1mm !important; }
+          /* Side breakdown fills full height and stretches toward the scoring band */
+          .print-radar .print-side {
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
+            gap: 1mm !important;
+          }
+          .print-radar .print-side-inner {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 1mm !important;
+            flex: 1 1 auto !important;
+            min-height: 0 !important;
+          }
+          .print-radar .print-side-inner > div {
+            flex: 1 1 auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            margin-bottom: 0 !important;
+          }
           .print-radar .print-side .print-cat-title { font-size: 9px !important; padding: 1px 0 !important; }
           .print-radar .print-side .print-cat-row { font-size: 9px !important; padding: 0 4px !important; line-height: 1.2 !important; }
-          /* Highlight total score block */
+          /* Highlight total score block and push it to the bottom */
           .print-radar .print-total {
             border-width: 3px !important;
-            margin-top: 1mm !important;
+            margin-top: auto !important;
+            flex: 0 0 auto !important;
           }
           .print-radar .print-total .print-total-title { font-size: 11px !important; padding: 2px 0 !important; }
           .print-radar .print-total .print-total-row { font-size: 10px !important; padding: 1px 4px !important; }
