@@ -39,29 +39,38 @@ export const Route = createFileRoute("/auditor")({
 
 function AuditorPage() {
   const today = new Date();
-  const [year, setYear] = useState(today.getFullYear());
-  const [month, setMonth] = useState(today.getMonth());
   const [confirmed, setConfirmed] = useState<string | null>(null);
 
   const { all, active, save } = useAuditorsStore();
   const [newName, setNewName] = useState("");
 
-  const goto = (delta: number) => {
-    const d = new Date(year, month + delta, 1);
-    setYear(d.getFullYear());
-    setMonth(d.getMonth());
-  };
+  // Generate rolling plans across current + next months so we always have
+  // enough upcoming audits for any active auditor.
+  const rollingAssignments = useMemo(() => {
+    const out: ReturnType<typeof generatePlan>["assignments"] = [];
+    const startMonth = today.getMonth();
+    const startYear = today.getFullYear();
+    for (let i = 0; i < 4; i++) {
+      const d = new Date(startYear, startMonth + i, 1);
+      const plan = generatePlan({ year: d.getFullYear(), month: d.getMonth(), auditors: active });
+      out.push(...plan.assignments);
+    }
+    return out;
+  }, [active, today]);
 
-  const plan = useMemo(
-    () => generatePlan({ year, month, auditors: active }),
-    [year, month, active],
+  const todayIso = useMemo(
+    () =>
+      `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`,
+    [today],
   );
 
   const mine = useMemo(() => {
     if (!confirmed) return [];
-    const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-    return plan.assignments.filter((a) => a.auditor === confirmed && a.date >= todayIso);
-  }, [confirmed, plan, today]);
+    return rollingAssignments
+      .filter((a) => a.auditor === confirmed && a.date >= todayIso)
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(0, 5);
+  }, [confirmed, rollingAssignments, todayIso]);
 
   const toggle = (name: string, checked: boolean) => {
     const next = checked
