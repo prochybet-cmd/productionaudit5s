@@ -202,6 +202,73 @@ function AuditorPage() {
           )}
         </section>
       )}
+
+      {/* Správa auditorů — chráněno heslem pro změny */}
+      <AdminLockSection
+        title="Správa auditorů"
+        description='Změny v seznamu auditorů (přidání, smazání, deaktivace) jsou chráněné heslem. Zadej heslo pro odemknutí úprav.'
+      >
+        <section className="border-2 border-ink bg-card p-6 shadow-[6px_6px_0_0_#000] space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <h2 className="font-display text-2xl tracking-wider">Správa auditorů</h2>
+            </div>
+            <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+              {active.length}/{all.length} aktivních
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Odškrtni auditora (např. dlouhodobá nemoc) — vyjme se z plánování. Změny se ihned
+            promítnou do karty <strong>Plán</strong>.
+          </p>
+
+          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {all.map((name) => {
+              const checked = active.includes(name);
+              return (
+                <li
+                  key={name}
+                  className={`flex items-center justify-between gap-2 border-2 px-3 py-2 ${checked ? "border-ink bg-background" : "border-dashed border-muted-foreground/40 bg-muted/30 opacity-70"}`}
+                >
+                  <label className="flex items-center gap-2 flex-1 cursor-pointer">
+                    <Checkbox
+                      checked={checked}
+                      onCheckedChange={(v) => toggle(name, Boolean(v))}
+                    />
+                    <span className="font-mono text-sm">{name}</span>
+                  </label>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                    onClick={() => removeAuditor(name)}
+                    title="Smazat auditora"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="flex gap-2 pt-2 border-t-2 border-dashed border-border">
+            <Input
+              placeholder='Nový auditor, např. "J Novák (JNO)"'
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") addAuditor();
+              }}
+              className="border-2 font-mono"
+            />
+            <Button onClick={addAuditor} className="bg-primary text-primary-foreground hover:bg-primary/90 gap-1">
+              <Plus className="h-4 w-4" />
+              Přidat
+            </Button>
+          </div>
+        </section>
+      </AdminLockSection>
     </div>
   );
 }
