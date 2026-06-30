@@ -49,13 +49,13 @@ function PlannerPage() {
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
   const { active: zones } = useZonesStore();
-  const { all: allAuditors, active: auditors } = useAuditorsStore();
+  const { all: allAuditors, active: auditors, activeInfos } = useAuditorsStore();
 
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const plan = useMemo(
-    () => generatePlan({ year, month, zones, auditors }),
-    [year, month, zones, auditors],
+    () => generatePlan({ year, month, zones, auditors, auditorInfos: activeInfos }),
+    [year, month, zones, auditors, activeInfos],
   );
 
   // Fetch audits covering the full span of visible weeks (weeks may spill across months).
