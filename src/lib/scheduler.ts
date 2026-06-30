@@ -164,7 +164,26 @@ export interface DayBucket {
   assignments: AuditAssignment[];
 }
 
-export function generatePlan(input: PlanInput): MonthlyPlan {
+function groupWorkdaysByIsoWeek(days: Date[]): Array<[number, Date[]]> {
+  const weekMap = new Map<number, Date[]>();
+  for (const d of days) {
+    const w = isoWeek(d);
+    if (!weekMap.has(w)) weekMap.set(w, []);
+    weekMap.get(w)!.push(d);
+  }
+  return Array.from(weekMap.entries());
+}
+
+function canonicalMonthForWeek(dates: Date[]): { year: number; month: number } {
+  // Shared boundary weeks are planned by the month containing Thursday.
+  // This keeps the same ISO week identical when switching between months
+  // (e.g. KW27 2026: 29.–30.6. belongs to the July plan).
+  const thursday = new Date(dates[0]);
+  thursday.setDate(thursday.getDate() + 3);
+  return { year: thursday.getFullYear(), month: thursday.getMonth() };
+}
+
+function generateRawMonthPlan(input: Required<PlanInput>): MonthlyPlan {
   const zones = input.zones ?? DEFAULT_ZONES;
   const auditors = input.auditors ?? DEFAULT_AUDITORS;
   const Z = zones.length;
@@ -173,13 +192,7 @@ export function generatePlan(input: PlanInput): MonthlyPlan {
   const days = workdaysOfMonth(input.year, input.month);
 
   // Group workdays by ISO week, preserving order.
-  const weekMap = new Map<number, Date[]>();
-  for (const d of days) {
-    const w = isoWeek(d);
-    if (!weekMap.has(w)) weekMap.set(w, []);
-    weekMap.get(w)!.push(d);
-  }
-  const orderedWeeks = Array.from(weekMap.entries()); // [weekNo, dates][]
+  const orderedWeeks = groupWorkdaysByIsoWeek(days); // [weekNo, dates][]
 
   const assignments: AuditAssignment[] = [];
   // Track zones each auditor has already audited this month (rotation rule)
@@ -284,6 +297,70 @@ export function generatePlan(input: PlanInput): MonthlyPlan {
       weekIndexInMonth: wIdx + 1,
       start: fmtDate(dates[0]),
       end: fmtDate(dates[dates.length - 1]),
+      days: dayBuckets,
+    };
+  });
+
+  return {
+    year: input.year,
+    month: input.month,
+    zones,
+    auditors,
+    assignments,
+    weeks,
+  };
+}
+
+export function generatePlan(input: PlanInput): MonthlyPlan {
+  const zones = input.zones ?? DEFAULT_ZONES;
+  const auditors = input.auditors ?? DEFAULT_AUDITORS;
+  const days = workdaysOfMonth(input.year, input.month);
+  const orderedWeeks = groupWorkdaysByIsoWeek(days);
+  const rawPlanCache = new Map<string, MonthlyPlan>();
+
+  const getRawPlan = (year: number, month: number) => {
+    const key = `${year}-${month}`;
+    const cached = rawPlanCache.get(key);
+    if (cached) return cached;
+    const generated = generateRawMonthPlan({ year, month, zones, auditors });
+    rawPlanCache.set(key, generated);
+    return generated;
+  };
+
+  const assignments: AuditAssignment[] = [];
+  const weeks: WeekBucket[] = orderedWeeks.map(([weekNo, dates], wIdx) => {
+    const canonical = canonicalMonthForWeek(dates);
+    const canonicalPlan = getRawPlan(canonical.year, canonical.month);
+    const start = fmtDate(dates[0]);
+    const end = fmtDate(dates[dates.length - 1]);
+    const canonicalWeek = canonicalPlan.weeks.find(
+      (week) => week.start === start && week.end === end,
+    );
+    const weekAssignments = (canonicalWeek?.days.flatMap((day) => day.assignments) ?? [])
+      .map((assignment) => ({
+        ...assignment,
+        weekIndexInMonth: wIdx + 1,
+      }));
+
+    assignments.push(...weekAssignments);
+
+    const dayBuckets: DayBucket[] = dates.map((d) => {
+      const iso = fmtDate(d);
+      const holidayName = HOLIDAYS[iso];
+      return {
+        date: iso,
+        weekday: WEEKDAY_SHORT[d.getDay()],
+        isHoliday: Boolean(holidayName),
+        holidayName,
+        assignments: weekAssignments.filter((a) => a.date === iso),
+      };
+    });
+
+    return {
+      weekNumber: weekNo,
+      weekIndexInMonth: wIdx + 1,
+      start,
+      end,
       days: dayBuckets,
     };
   });
