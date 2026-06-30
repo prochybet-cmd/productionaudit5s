@@ -48,9 +48,9 @@ export const MACHINES: MachineRow[] = [
   { zone: "Z3", line: "L6", project: "PPE/C", machine: "MO355" },
   { zone: "Z3", line: "L6", project: "PPE/C", machine: "MO359" },
   { zone: "Z3", line: "L6", project: "XFK", machine: "MO348" },
-  // Z3 / L7
-  { zone: "Z3", line: "L7", project: "Caddy5", machine: "SO556" },
-  { zone: "Z3", line: "L7", project: "Caddy5", machine: "SO550" },
+  // Z1-A / L7 (přesunuto z Z3)
+  { zone: "Z1-A", line: "L7", project: "Caddy5", machine: "SO556" },
+  { zone: "Z1-A", line: "L7", project: "Caddy5", machine: "SO550" },
   // Z1-A / L7
   { zone: "Z1-A", line: "L7", project: "PPE/C", machine: "SO008" },
   { zone: "Z1-A", line: "L7", project: "PPE/C", machine: "SO005" },
