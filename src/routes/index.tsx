@@ -104,7 +104,7 @@ function PlannerPage() {
 
   const completedCount = plan.assignments.filter((a) => {
     const w = plan.weeks.find((wk) => a.date >= wk.start && a.date <= wk.end);
-    return w ? isAssignmentCompleted(w.weekNumber, a.zone) : false;
+    return w ? isAssignmentCompleted(w.weekNumber, a.zone, a.auditor) : false;
   }).length;
 
 
