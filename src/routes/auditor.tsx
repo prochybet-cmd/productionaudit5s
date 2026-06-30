@@ -91,27 +91,8 @@ function AuditorPage() {
           </div>
           <h1 className="font-display text-5xl text-ink mt-1">Kam mám jít?</h1>
           <p className="text-sm text-muted-foreground mt-2">
-            Zadej své jméno a potvrď. Uvidíš všechny své 5S audity v měsíci{" "}
-            <strong>{MONTH_NAMES_CS[month]} {year}</strong>.
+            Vyber své jméno a zobrazí se ti následujících 5 naplánovaných 5S auditů: kdy a do jaké zóny.
           </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => goto(-1)}>
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setYear(today.getFullYear());
-              setMonth(today.getMonth());
-            }}
-            className="font-mono uppercase"
-          >
-            Dnes
-          </Button>
-          <Button variant="outline" size="icon" onClick={() => goto(1)}>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 
