@@ -296,7 +296,7 @@ function generateRawMonthPlan(input: PlanInput): MonthlyPlan {
       if (usedAuditors.has(aIdx)) continue;
       const eligibleZones = zones
         .map((_, i) => i)
-        .filter((zi) => isEligible(auditors[aIdx], zones[zi]));
+        .filter((zi) => isEligible(auditors[aIdx], zones[zi], auditorInfos));
       if (eligibleZones.length === 0) continue;
       const fresh = eligibleZones.filter(
         (zi) => !auditorHistory[aIdx].has(zones[zi]),
