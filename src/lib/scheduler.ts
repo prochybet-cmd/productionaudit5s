@@ -243,9 +243,10 @@ function canonicalMonthForWeek(dates: Date[]): { year: number; month: number } {
   return { year: thursday.getFullYear(), month: thursday.getMonth() };
 }
 
-function generateRawMonthPlan(input: Required<PlanInput>): MonthlyPlan {
+function generateRawMonthPlan(input: PlanInput): MonthlyPlan {
   const zones = input.zones ?? DEFAULT_ZONES;
   const auditors = input.auditors ?? DEFAULT_AUDITORS;
+  const auditorInfos = input.auditorInfos;
   const Z = zones.length;
   const A = auditors.length;
 
@@ -258,8 +259,9 @@ function generateRawMonthPlan(input: Required<PlanInput>): MonthlyPlan {
 
   // Precompute eligible auditor indices per zone
   const eligibleByZone: number[][] = zones.map((z) =>
-    auditors.map((_, i) => i).filter((i) => isEligible(auditors[i], z)),
+    auditors.map((_, i) => i).filter((i) => isEligible(auditors[i], z, auditorInfos)),
   );
+
 
   orderedWeeks.forEach(([weekNo, dates], wIdx) => {
     const weekSlots: { zone: number; auditor: number }[] = [];
