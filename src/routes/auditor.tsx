@@ -59,8 +59,9 @@ function AuditorPage() {
 
   const mine = useMemo(() => {
     if (!confirmed) return [];
-    return plan.assignments.filter((a) => a.auditor === confirmed);
-  }, [confirmed, plan]);
+    const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+    return plan.assignments.filter((a) => a.auditor === confirmed && a.date >= todayIso);
+  }, [confirmed, plan, today]);
 
   const toggle = (name: string, checked: boolean) => {
     const next = checked
