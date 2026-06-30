@@ -13,8 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  MONTH_NAMES_CS,
-  MONTH_SHORT_NAMES_CS,
   formatDateCs,
   generatePlan,
 } from "@/lib/scheduler";
