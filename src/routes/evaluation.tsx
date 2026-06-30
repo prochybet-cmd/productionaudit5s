@@ -194,23 +194,28 @@ function EvaluationPage() {
             width: 100% !important;
             height: 100% !important;
             margin: 0 !important;
-            padding: 4mm !important;
+            padding: 3mm !important;
             box-shadow: none !important;
             border: 2px solid #000 !important;
             background: #fff !important;
             overflow: hidden !important;
+            display: flex !important;
+            flex-direction: column !important;
             page-break-inside: avoid;
             break-inside: avoid;
           }
           .print-radar .print-grid {
             display: grid !important;
-            grid-template-columns: 1fr 68mm !important;
+            grid-template-columns: 1fr 66mm !important;
             gap: 3mm !important;
             align-items: stretch !important;
+            flex: 1 1 auto !important;
+            min-height: 0 !important;
           }
-          .print-radar .print-radar-chart { height: 155mm !important; width: 100% !important; }
-          .print-radar .print-legend { margin-top: 2mm !important; }
-          .print-radar .print-legend > div { padding: 1mm !important; }
+          .print-radar .print-radar-chart { height: 138mm !important; width: 100% !important; }
+          .print-radar .print-legend { margin-top: 1.5mm !important; flex-shrink: 0 !important; }
+          .print-radar .print-legend > div { padding: 0.8mm !important; }
+
           .print-radar .recharts-wrapper,
           .print-radar .recharts-surface { overflow: visible !important; }
           /* Compact side breakdown for print */
