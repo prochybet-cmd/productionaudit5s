@@ -33,13 +33,24 @@ export const Route = createFileRoute("/zones")({
 
 function ZonesPage() {
   const today = new Date();
-  const [year] = useState(today.getFullYear());
-  const [month] = useState(today.getMonth());
+  const [year, setYear] = useState(today.getFullYear());
+  const [month, setMonth] = useState(today.getMonth());
   const { active: zones } = useZonesStore();
   const plan = useMemo(
     () => generatePlan({ year, month, zones }),
     [year, month, zones],
   );
+
+  const shiftMonth = (delta: number) => {
+    const d = new Date(year, month + delta, 1);
+    setYear(d.getFullYear());
+    setMonth(d.getMonth());
+  };
+
+  const resetToToday = () => {
+    setYear(today.getFullYear());
+    setMonth(today.getMonth());
+  };
 
   const byZone = useMemo(() => {
     const map = new Map<string, typeof plan.assignments>();
