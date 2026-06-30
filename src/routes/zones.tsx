@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { MapPin, CalendarDays, Factory, Cog, Settings2, Plus, Trash2 } from "lucide-react";
+import { MapPin, CalendarDays, Factory, Cog, Settings2, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   MONTH_NAMES_CS,
   formatDateCs,
@@ -32,13 +32,24 @@ export const Route = createFileRoute("/zones")({
 
 function ZonesPage() {
   const today = new Date();
-  const [year] = useState(today.getFullYear());
-  const [month] = useState(today.getMonth());
+  const [year, setYear] = useState(today.getFullYear());
+  const [month, setMonth] = useState(today.getMonth());
   const { active: zones } = useZonesStore();
   const plan = useMemo(
     () => generatePlan({ year, month, zones }),
     [year, month, zones],
   );
+
+  const shiftMonth = (delta: number) => {
+    const d = new Date(year, month + delta, 1);
+    setYear(d.getFullYear());
+    setMonth(d.getMonth());
+  };
+
+  const resetToToday = () => {
+    setYear(today.getFullYear());
+    setMonth(today.getMonth());
+  };
 
   const byZone = useMemo(() => {
     const map = new Map<string, typeof plan.assignments>();
@@ -60,7 +71,7 @@ function ZonesPage() {
           Zóny · stroje
         </h1>
         <p className="text-sm text-muted-foreground mt-2">
-          Stroje podle zón, plán auditů pro {MONTH_NAMES_CS[month]} {year} a správa seznamu zón.
+          Stroje podle zón, plánované 5S audity a správa seznamu zón.
         </p>
       </div>
 
@@ -90,7 +101,31 @@ function ZonesPage() {
           <MachinesByZone />
         </TabsContent>
 
-        <TabsContent value="plan" className="mt-6">
+        <TabsContent value="plan" className="mt-6 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-2 border-ink bg-card px-4 py-3 shadow-[4px_4px_0_0_#000]">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => shiftMonth(-1)}
+              className="rounded-none border-2 border-ink bg-background hover:bg-primary hover:text-primary-foreground font-mono text-xs uppercase"
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" /> měsíc zpět
+            </Button>
+            <div className="font-display text-xl tracking-wider">
+              {MONTH_NAMES_CS[month]} {year}
+              {year === today.getFullYear() && month === today.getMonth() && (
+                <span className="ml-2 font-mono text-xs uppercase tracking-wider text-primary">aktuální</span>
+              )}
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => shiftMonth(1)}
+              className="rounded-none border-2 border-ink bg-background hover:bg-primary hover:text-primary-foreground font-mono text-xs uppercase"
+            >
+              měsíc vpřed <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {Array.from(byZone.entries()).map(([zone, items]) => (
               <div key={zone} className="stamp bg-card overflow-hidden">
