@@ -196,7 +196,9 @@ export interface PlanInput {
   month: number; // 0-based
   zones?: string[];
   auditors?: string[];
+  auditorInfos?: AuditorInfo[];
 }
+
 
 export interface MonthlyPlan {
   year: number;
