@@ -52,6 +52,12 @@ export const Route = createFileRoute("/")({
 });
 
 function PlannerPage() {
+  const { department } = useDepartment();
+  if (department === "logistika") return <LogisticsHome />;
+  return <VyrobaPlanner />;
+}
+
+function VyrobaPlanner() {
   const today = new Date();
   const todayIso = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
   const [year, setYear] = useState(today.getFullYear());
@@ -75,6 +81,7 @@ function PlannerPage() {
       const { data, error } = await supabase
         .from("audits")
         .select("id, zone, auditor, audit_date, created_at")
+        .eq("department", "vyroba")
         .gte("audit_date", rangeStart)
         .lte("audit_date", rangeEnd)
         .order("created_at", { ascending: false });
