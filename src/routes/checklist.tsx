@@ -15,7 +15,7 @@ import {
 } from "@/lib/checklist";
 import { DEFAULT_AUDITORS, DEFAULT_ZONES } from "@/lib/scheduler";
 import { LOGISTICS_ZONES, useDepartment, DEPARTMENT_LABEL } from "@/lib/department-store";
-import { supabase } from "@/integrations/supabase/client";
+import { saveAudit } from "@/lib/audits.functions";
 
 export const Route = createFileRoute("/checklist")({
   head: () => ({
@@ -113,29 +113,25 @@ function ChecklistPage() {
     }
     setSaving(true);
     try {
-      const { data: audit, error: e1 } = await supabase
-        .from("audits")
-        .insert({
-          zone, auditor: auditor.trim(), audit_date: date,
-          total_score: total, max_score: MAX_TOTAL,
+      await saveAudit({
+        data: {
+          zone,
+          auditor: auditor.trim(),
+          audit_date: date,
+          total_score: total,
+          max_score: MAX_TOTAL,
           note: overallNote || null,
           department,
-        })
-        .select()
-        .single();
-      if (e1 || !audit) throw e1 ?? new Error("Insert failed");
-
-      const rows = CHECKLIST.flatMap((cat) =>
-        cat.items.map((it) => ({
-          audit_id: audit.id,
-          item_id: it.id,
-          category: cat.key,
-          score: scores[it.id] ?? 0,
-          note: notes[it.id] || null,
-        })),
-      );
-      const { error: e2 } = await supabase.from("audit_scores").insert(rows);
-      if (e2) throw e2;
+          scores: CHECKLIST.flatMap((cat) =>
+            cat.items.map((it) => ({
+              item_id: it.id,
+              category: cat.key,
+              score: scores[it.id] ?? 0,
+              note: notes[it.id] || null,
+            })),
+          ),
+        },
+      });
 
       toast.success("Audit byl uložen do archivu.");
       navigate({ to: "/archive" });

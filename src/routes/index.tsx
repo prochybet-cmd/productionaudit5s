@@ -25,7 +25,7 @@ import {
 } from "@/lib/scheduler";
 import { useAuditorsStore } from "@/lib/auditors-store";
 import { useZonesStore } from "@/lib/zones-store";
-import { supabase } from "@/integrations/supabase/client";
+import { listAuditsByDeptRange } from "@/lib/audits.functions";
 import { useDepartment } from "@/lib/department-store";
 
 
@@ -78,15 +78,10 @@ function VyrobaPlanner() {
   const { data: completedAudits } = useQuery({
     queryKey: ["audits-for-plan", rangeStart, rangeEnd],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("audits")
-        .select("id, zone, auditor, audit_date, created_at")
-        .eq("department", "vyroba")
-        .gte("audit_date", rangeStart)
-        .lte("audit_date", rangeEnd)
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data as { id: string; zone: string; auditor: string; audit_date: string; created_at: string }[];
+      const rows = await listAuditsByDeptRange({
+        data: { department: "vyroba", from: rangeStart, to: rangeEnd },
+      });
+      return [...rows].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
     },
   });
 

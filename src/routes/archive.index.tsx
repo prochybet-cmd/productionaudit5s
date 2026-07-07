@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Archive, Eye, Loader2, Factory, Truck, ChevronDown, ChevronRight } from "lucide-react";
 import { useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { listAudits } from "@/lib/audits.functions";
 
 export const Route = createFileRoute("/archive/")({
   head: () => ({
@@ -39,15 +39,7 @@ function monthLabel(ym: string) {
 function ArchivePage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["audits-archive"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("audits")
-        .select("*")
-        .order("audit_date", { ascending: false })
-        .order("created_at", { ascending: false });
-      if (error) throw error;
-      return data as AuditRow[];
-    },
+    queryFn: async () => (await listAudits()) as AuditRow[],
   });
 
   return (

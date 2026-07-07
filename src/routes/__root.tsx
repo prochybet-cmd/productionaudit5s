@@ -9,8 +9,10 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  redirect,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { getGateStatus } from "@/lib/gate.functions";
 
 import "@fontsource/bebas-neue/400.css";
 import "@fontsource/inter/400.css";
@@ -113,6 +115,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", sizes: "512x512", href: "/favicon.png" },
     ],
   }),
+  beforeLoad: async ({ location }) => {
+    if (location.pathname === "/unlock") return;
+    const { unlocked } = await getGateStatus();
+    if (!unlocked) throw redirect({ to: "/unlock" });
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
