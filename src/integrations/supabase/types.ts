@@ -54,6 +54,7 @@ export type Database = {
           audit_date: string
           auditor: string
           created_at: string
+          department: string
           id: string
           max_score: number
           note: string | null
@@ -64,6 +65,7 @@ export type Database = {
           audit_date: string
           auditor: string
           created_at?: string
+          department?: string
           id?: string
           max_score?: number
           note?: string | null
@@ -74,6 +76,7 @@ export type Database = {
           audit_date?: string
           auditor?: string
           created_at?: string
+          department?: string
           id?: string
           max_score?: number
           note?: string | null
