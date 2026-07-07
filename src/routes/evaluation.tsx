@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { CHECKLIST } from "@/lib/checklist";
 import { DEFAULT_AUDITORS } from "@/lib/scheduler";
+import { useDepartment, type Department } from "@/lib/department-store";
 
 // Mapping of Z-groups (reporting zones) to underlying L-zones (audit zones)
 const Z_GROUPS: Record<string, string[]> = {
@@ -70,10 +71,13 @@ const RADAR_COLORS = ["hsl(48 98% 52%)", "hsl(28 95% 55%)", "hsl(200 80% 50%)", 
 
 
 function EvaluationPage() {
+  const { department } = useDepartment();
+  const [scope, setScope] = useState<Department | "all">(department);
   const [zoneFilter, setZoneFilter] = useState<string>("");
   const [auditorFilter, setAuditorFilter] = useState<string>("");
   const [monthFilter, setMonthFilter] = useState<string>("");
-  
+  // Keep scope in sync when user toggles department in header
+  useMemo(() => setScope(department), [department]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["evaluation"],
@@ -90,14 +94,15 @@ function EvaluationPage() {
 
   const filtered = useMemo(() => {
     if (!data) return null;
-    let audits = data.audits;
-    if (zoneFilter) audits = audits.filter((a) => zoneToGroup(a.zone) === zoneFilter);
+    let audits = data.audits as Array<typeof data.audits[number] & { department?: string }>;
+    if (scope !== "all") audits = audits.filter((a) => (a.department ?? "vyroba") === scope);
+    if (zoneFilter && scope === "vyroba") audits = audits.filter((a) => zoneToGroup(a.zone) === zoneFilter);
     if (auditorFilter) audits = audits.filter((a) => a.auditor === auditorFilter);
     if (monthFilter) audits = audits.filter((a) => a.audit_date.startsWith(monthFilter));
     const auditIds = new Set(audits.map((a) => a.id));
     const scores = data.scores.filter((s) => auditIds.has(s.audit_id));
     return { audits, scores };
-  }, [data, zoneFilter, auditorFilter, monthFilter]);
+  }, [data, scope, zoneFilter, auditorFilter, monthFilter]);
 
   // Single aggregated series — always one black line driven by current filters
   const radarData = useMemo(() => {
