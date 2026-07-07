@@ -112,10 +112,13 @@ function EvaluationPage() {
     const chartData = CATEGORIES.map((c) => {
       const sum = sumByCat[c.key] ?? 0;
       const cnt = cntByCat[c.key] ?? 0;
+      const avg = cnt > 0 ? sum / cnt : 0;
+      // FIX BUG #3: Ensure value is always a valid number (prevent NaN)
+      const safeAvg = isFinite(avg) ? Number(avg.toFixed(2)) : 0;
       return {
         category: c.cs,
         band5: 5, band4: 4, band3: 3, band2: 2, band1: 1,
-        [SERIES_KEY]: cnt > 0 ? Number((sum / cnt).toFixed(2)) : 0,
+        [SERIES_KEY]: safeAvg,
       };
     });
     return { series: [SERIES_KEY], data: chartData };
