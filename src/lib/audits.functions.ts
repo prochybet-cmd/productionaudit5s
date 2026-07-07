@@ -44,7 +44,7 @@ export const listAudits = createServerFn({ method: "GET" }).handler(async () => 
 });
 
 export const listAuditsByDeptRange = createServerFn({ method: "GET" })
-  .inputValidator((data: { department: string; from: string; to: string }) => data)
+  .validator((data: { department: string; from: string; to: string }) => data)
   .handler(async ({ data }) => {
     await requireUnlocked();
     const db = await admin();
@@ -74,7 +74,7 @@ export const listAuditsAndScores = createServerFn({ method: "GET" }).handler(asy
 });
 
 export const getAuditWithScores = createServerFn({ method: "GET" })
-  .inputValidator((data: { id: string }) => data)
+  .validator((data: { id: string }) => data)
   .handler(async ({ data }) => {
     await requireUnlocked();
     const db = await admin();
@@ -107,7 +107,7 @@ type SaveAuditInput = {
 };
 
 export const saveAudit = createServerFn({ method: "POST" })
-  .inputValidator((data: SaveAuditInput) => data)
+  .validator((data: SaveAuditInput) => data)
   .handler(async ({ data }) => {
     await requireUnlocked();
 
