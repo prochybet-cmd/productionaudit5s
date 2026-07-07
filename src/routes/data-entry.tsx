@@ -72,6 +72,8 @@ function DataEntryPage() {
   const total = subtotals.reduce((a, s) => a + s.sum, 0);
   const filledCount = Object.values(scores).filter((v) => v !== null).length;
   const allFilled = filledCount === 25;
+  const auditorMissing = !auditor.trim();
+  const canSave = allFilled && !auditorMissing;
   const totalPct = Math.round((total / MAX_TOTAL) * 100);
 
   const setScore = (id: number, raw: string) => {
