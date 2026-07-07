@@ -14,6 +14,7 @@ import {
   scoreLabel,
 } from "@/lib/checklist";
 import { DEFAULT_AUDITORS, DEFAULT_ZONES } from "@/lib/scheduler";
+import { LOGISTICS_ZONES, useDepartment, DEPARTMENT_LABEL } from "@/lib/department-store";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/checklist")({
