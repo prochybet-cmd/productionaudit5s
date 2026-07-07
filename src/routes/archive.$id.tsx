@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { getAuditWithScores } from "@/lib/audits.functions";
 import { CHECKLIST } from "@/lib/checklist";
 
 export const Route = createFileRoute("/archive/$id")({
@@ -14,15 +14,7 @@ function AuditDetailPage() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["audit", id],
-    queryFn: async () => {
-      const [a, s] = await Promise.all([
-        supabase.from("audits").select("*").eq("id", id).single(),
-        supabase.from("audit_scores").select("*").eq("audit_id", id).order("item_id"),
-      ]);
-      if (a.error) throw a.error;
-      if (s.error) throw s.error;
-      return { audit: a.data, scores: s.data };
-    },
+    queryFn: async () => getAuditWithScores({ data: { id } }),
   });
 
   if (isLoading) {

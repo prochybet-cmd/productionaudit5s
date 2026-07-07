@@ -9,7 +9,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from "recharts";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
+import { listAuditsAndScores } from "@/lib/audits.functions";
 import { CHECKLIST } from "@/lib/checklist";
 import { DEFAULT_AUDITORS } from "@/lib/scheduler";
 import { useDepartment, type Department } from "@/lib/department-store";
@@ -81,15 +81,7 @@ function EvaluationPage() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["evaluation"],
-    queryFn: async () => {
-      const [a, s] = await Promise.all([
-        supabase.from("audits").select("*"),
-        supabase.from("audit_scores").select("*"),
-      ]);
-      if (a.error) throw a.error;
-      if (s.error) throw s.error;
-      return { audits: a.data, scores: s.data };
-    },
+    queryFn: async () => listAuditsAndScores(),
   });
 
   const filtered = useMemo(() => {
