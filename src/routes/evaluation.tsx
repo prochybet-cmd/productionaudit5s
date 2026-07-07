@@ -164,8 +164,20 @@ function EvaluationPage() {
 
   const months = useMemo(() => {
     if (!data) return [];
-    return Array.from(new Set(data.audits.map((a) => a.audit_date.slice(0, 7)))).sort();
-  }, [data]);
+    const audits = scope === "all"
+      ? data.audits
+      : data.audits.filter((a) => ((a as { department?: string }).department ?? "vyroba") === scope);
+    return Array.from(new Set(audits.map((a) => a.audit_date.slice(0, 7)))).sort();
+  }, [data, scope]);
+
+  const auditorOptions = useMemo(() => {
+    if (scope === "vyroba") return DEFAULT_AUDITORS;
+    if (!data) return [];
+    const audits = scope === "all"
+      ? data.audits
+      : data.audits.filter((a) => ((a as { department?: string }).department ?? "vyroba") === scope);
+    return Array.from(new Set(audits.map((a) => a.auditor))).sort();
+  }, [data, scope]);
 
   const totalAudits = filtered?.audits.length ?? 0;
   const avgPct = filtered && filtered.audits.length > 0
