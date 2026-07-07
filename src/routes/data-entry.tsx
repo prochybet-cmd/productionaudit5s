@@ -35,8 +35,10 @@ function todayIso() {
 
 function DataEntryPage() {
   const navigate = useNavigate();
-  const [zone, setZone] = useState<string>(DEFAULT_ZONES[0]);
-  const [auditor, setAuditor] = useState<string>(DEFAULT_AUDITORS[0]);
+  const { department } = useDepartment();
+  const zoneList = department === "logistika" ? LOGISTICS_ZONES : DEFAULT_ZONES;
+  const [zone, setZone] = useState<string>(zoneList[0]);
+  const [auditor, setAuditor] = useState<string>(department === "logistika" ? "" : DEFAULT_AUDITORS[0]);
   const [date, setDate] = useState<string>(todayIso());
   const [overallNote, setOverallNote] = useState<string>("");
   const [notes, setNotes] = useState<Record<number, string>>({});
@@ -46,6 +48,11 @@ function DataEntryPage() {
     for (const cat of CHECKLIST) for (const it of cat.items) init[it.id] = null;
     return init;
   });
+  useEffect(() => {
+    setZone(zoneList[0]);
+    setAuditor(department === "logistika" ? "" : DEFAULT_AUDITORS[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [department]);
 
   const flat = useMemo(
     () => CHECKLIST.flatMap((cat) => cat.items.map((it) => ({ cat, it }))),
