@@ -293,15 +293,42 @@ function EvaluationPage() {
         </Button>
       </section>
 
+      {/* Scope toggle */}
+      <section className="border-2 border-ink bg-card p-4 shadow-[3px_3px_0_0_#000] flex flex-wrap items-center gap-3 no-print">
+        <Label className="font-mono text-[10px] uppercase tracking-[0.2em]">Rozsah dat</Label>
+        <div className="flex border-2 border-ink shadow-[2px_2px_0_0_#000]">
+          {([
+            { k: "vyroba", label: "Výroba" },
+            { k: "logistika", label: "Logistika" },
+            { k: "all", label: "Celkové (Výroba + Logistika)" },
+          ] as const).map((opt, i) => (
+            <button
+              key={opt.k}
+              type="button"
+              onClick={() => { setScope(opt.k); setAuditorFilter(""); setZoneFilter(""); }}
+              className={`px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${i > 0 ? "border-l-2 border-ink" : ""} ${scope === opt.k ? "bg-primary text-primary-foreground" : "bg-card hover:bg-accent/40"}`}
+              aria-pressed={scope === opt.k}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
       {/* Filters */}
       <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000] grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
         <div className="space-y-1.5">
           <Label className="font-mono text-[10px] uppercase tracking-[0.2em] flex items-center gap-1">
             <Filter className="h-3 w-3" /> Zóna (Z)
           </Label>
-          <select value={zoneFilter} onChange={(e) => setZoneFilter(e.target.value)} className="w-full border-2 border-input bg-background px-3 py-2 font-mono text-sm">
-            <option value="">Všechny zóny</option>
-            {Z_GROUP_KEYS.map((z) => (
+          <select
+            value={zoneFilter}
+            onChange={(e) => setZoneFilter(e.target.value)}
+            disabled={scope !== "vyroba"}
+            className="w-full border-2 border-input bg-background px-3 py-2 font-mono text-sm disabled:opacity-50"
+          >
+            <option value="">{scope === "vyroba" ? "Všechny zóny" : "— (jen pro Výrobu)"}</option>
+            {scope === "vyroba" && Z_GROUP_KEYS.map((z) => (
               <option key={z} value={z}>{z} ({Z_GROUPS[z].join(", ")})</option>
             ))}
           </select>
@@ -310,7 +337,7 @@ function EvaluationPage() {
           <Label className="font-mono text-[10px] uppercase tracking-[0.2em]">Auditor</Label>
           <select value={auditorFilter} onChange={(e) => setAuditorFilter(e.target.value)} className="w-full border-2 border-input bg-background px-3 py-2 font-mono text-sm">
             <option value="">Všichni auditoři</option>
-            {DEFAULT_AUDITORS.map((a) => <option key={a} value={a}>{a}</option>)}
+            {auditorOptions.map((a) => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
         <div className="space-y-1.5">
