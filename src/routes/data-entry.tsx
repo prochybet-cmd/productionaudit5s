@@ -332,7 +332,7 @@ function DataEntryPage() {
         </div>
         <Button
           onClick={saveToArchive}
-          disabled={saving || !allFilled}
+          disabled={saving || !canSave}
           size="lg"
           className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
         >
