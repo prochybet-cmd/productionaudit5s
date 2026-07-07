@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireUnlocked } from "./gate.functions";
 
 type AuditRow = {
   id: string;
