@@ -26,6 +26,11 @@ async function admin() {
   return supabaseAdmin;
 }
 
+async function requireUnlocked() {
+  const mod = await import("./gate.server");
+  return mod.requireUnlocked();
+}
+
 export const listAudits = createServerFn({ method: "GET" }).handler(async () => {
   await requireUnlocked();
   const db = await admin();
