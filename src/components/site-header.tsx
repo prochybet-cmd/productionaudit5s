@@ -1,7 +1,10 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import { CalendarRange, UserSearch, ClipboardList, ClipboardCheck, FileSpreadsheet, Archive, BarChart3, Factory, Truck } from "lucide-react";
+import { Link, useRouter, useRouterState } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
+import { CalendarRange, UserSearch, ClipboardList, ClipboardCheck, FileSpreadsheet, Archive, BarChart3, Factory, Truck, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDepartment, type Department } from "@/lib/department-store";
+import { lockSite } from "@/lib/gate.functions";
+import { useQueryClient } from "@tanstack/react-query";
 
 const NAV_VYROBA = [
   { to: "/", label: "Plán", icon: CalendarRange },
@@ -25,8 +28,21 @@ export function SiteHeader() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { department, setDepartment } = useDepartment();
   const nav = department === "logistika" ? NAV_LOGISTIKA : NAV_VYROBA;
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const lock = useServerFn(lockSite);
 
   const toggle = (v: Department) => () => setDepartment(v);
+
+  const handleLock = async () => {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await lock();
+    await router.invalidate();
+    await router.navigate({ to: "/unlock" });
+  };
+
+  if (pathname === "/unlock") return null;
 
   return (
     <header className="sticky top-0 z-40 border-b-2 border-ink bg-secondary text-secondary-foreground">
@@ -93,6 +109,14 @@ export function SiteHeader() {
               </Link>
             );
           })}
+          <button
+            type="button"
+            onClick={handleLock}
+            title="Odhlásit / zamknout"
+            className="ml-1 flex shrink-0 items-center gap-2 border-2 border-ink bg-card px-3 py-1.5 font-mono text-[10px] uppercase tracking-wider text-ink shadow-[2px_2px_0_0_#000] transition-colors hover:bg-primary hover:text-primary-foreground"
+          >
+            <LogOut className="h-3.5 w-3.5" /> Zamknout
+          </button>
         </nav>
       </div>
     </header>
