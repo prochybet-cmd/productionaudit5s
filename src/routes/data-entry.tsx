@@ -72,6 +72,8 @@ function DataEntryPage() {
   const total = subtotals.reduce((a, s) => a + s.sum, 0);
   const filledCount = Object.values(scores).filter((v) => v !== null).length;
   const allFilled = filledCount === 25;
+  const auditorMissing = !auditor.trim();
+  const canSave = allFilled && !auditorMissing;
   const totalPct = Math.round((total / MAX_TOTAL) * 100);
 
   const setScore = (id: number, raw: string) => {
@@ -152,7 +154,7 @@ function DataEntryPage() {
           </Button>
           <Button
             onClick={saveToArchive}
-            disabled={saving || !allFilled}
+            disabled={saving || !canSave}
             className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
@@ -185,8 +187,8 @@ function DataEntryPage() {
             <Input
               value={auditor}
               onChange={(e) => setAuditor(e.target.value)}
-              placeholder="Jméno auditora"
-              className="font-mono text-sm"
+              placeholder="Jméno auditora (povinné)"
+              className={`font-mono text-sm border-2 ${auditorMissing ? "border-destructive" : "border-ink"}`}
             />
           ) : (
             <select
@@ -330,7 +332,7 @@ function DataEntryPage() {
         </div>
         <Button
           onClick={saveToArchive}
-          disabled={saving || !allFilled}
+          disabled={saving || !canSave}
           size="lg"
           className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
         >
