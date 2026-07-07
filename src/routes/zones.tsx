@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { MapPin, CalendarDays, Factory, Cog, Settings2, Plus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { MapPin, CalendarDays, Factory, Cog, Settings2, Plus, Trash2, ChevronLeft, ChevronRight, Pencil, Check, X } from "lucide-react";
 import {
   MONTH_NAMES_CS,
   formatDateCs,
@@ -176,6 +176,9 @@ function ZonesPage() {
 function ZonesSettings() {
   const { all, active, save } = useZonesStore();
   const [newZone, setNewZone] = useState("");
+  const [editing, setEditing] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [editError, setEditError] = useState<string | null>(null);
 
   const toggle = (name: string, checked: boolean) => {
     const next = checked
@@ -192,7 +195,41 @@ function ZonesSettings() {
   };
 
   const removeZone = (name: string) => {
+    if (editing === name) cancelEdit();
     save({ all: all.filter((n) => n !== name), active: active.filter((n) => n !== name) });
+  };
+
+  const startEdit = (name: string) => {
+    setEditing(name);
+    setEditValue(name);
+    setEditError(null);
+  };
+
+  const cancelEdit = () => {
+    setEditing(null);
+    setEditValue("");
+    setEditError(null);
+  };
+
+  const commitEdit = (oldName: string) => {
+    const next = editValue.trim();
+    if (!next) {
+      setEditError("Název nesmí být prázdný");
+      return;
+    }
+    if (next === oldName) {
+      cancelEdit();
+      return;
+    }
+    if (all.some((n) => n.toLowerCase() === next.toLowerCase())) {
+      setEditError("Zóna s tímto názvem již existuje");
+      return;
+    }
+    save({
+      all: all.map((n) => (n === oldName ? next : n)),
+      active: active.map((n) => (n === oldName ? next : n)),
+    });
+    cancelEdit();
   };
 
   return (
@@ -207,34 +244,93 @@ function ZonesSettings() {
         </div>
       </div>
       <p className="text-xs text-muted-foreground">
-        Odškrtni zónu — dočasně se vyjme z plánování. Tlačítkem koše ji úplně smažeš.
+        Odškrtni zónu — dočasně se vyjme z plánování. Tužkou přejmenuješ, košem úplně smažeš.
         Změny se ihned promítnou do karty <strong>Plán</strong>.
       </p>
 
       <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {all.map((name) => {
           const checked = active.includes(name);
+          const isEditing = editing === name;
           return (
             <li
               key={name}
-              className={`flex items-center justify-between gap-2 border-2 px-3 py-2 ${checked ? "border-ink bg-background" : "border-dashed border-muted-foreground/40 bg-muted/30 opacity-70"}`}
+              className={`flex flex-col gap-1 border-2 px-3 py-2 ${checked ? "border-ink bg-background" : "border-dashed border-muted-foreground/40 bg-muted/30 opacity-70"}`}
             >
-              <label className="flex items-center gap-2 flex-1 cursor-pointer">
-                <Checkbox
-                  checked={checked}
-                  onCheckedChange={(v) => toggle(name, Boolean(v))}
-                />
-                <span className="font-mono text-sm">{name}</span>
-              </label>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                onClick={() => removeZone(name)}
-                title="Smazat zónu"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
+              <div className="flex items-center justify-between gap-2">
+                {isEditing ? (
+                  <>
+                    <Input
+                      autoFocus
+                      value={editValue}
+                      onChange={(e) => {
+                        setEditValue(e.target.value);
+                        setEditError(null);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") commitEdit(name);
+                        if (e.key === "Escape") cancelEdit();
+                      }}
+                      className="h-8 border-2 font-mono text-sm"
+                    />
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-primary hover:bg-primary hover:text-primary-foreground"
+                        onClick={() => commitEdit(name)}
+                        title="Uložit"
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground"
+                        onClick={cancelEdit}
+                        title="Zrušit"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <label className="flex items-center gap-2 flex-1 cursor-pointer">
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={(v) => toggle(name, Boolean(v))}
+                      />
+                      <span className="font-mono text-sm">{name}</span>
+                    </label>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-primary"
+                        onClick={() => startEdit(name)}
+                        title="Přejmenovat zónu"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                        onClick={() => removeZone(name)}
+                        title="Smazat zónu"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </div>
+              {isEditing && editError && (
+                <div className="font-mono text-[10px] uppercase tracking-wider text-destructive">
+                  {editError}
+                </div>
+              )}
             </li>
           );
         })}
