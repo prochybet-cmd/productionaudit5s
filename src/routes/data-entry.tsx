@@ -187,8 +187,8 @@ function DataEntryPage() {
             <Input
               value={auditor}
               onChange={(e) => setAuditor(e.target.value)}
-              placeholder="Jméno auditora"
-              className="font-mono text-sm"
+              placeholder="Jméno auditora (povinné)"
+              className={`font-mono text-sm border-2 ${auditorMissing ? "border-destructive" : "border-ink"}`}
             />
           ) : (
             <select
