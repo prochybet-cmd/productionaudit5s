@@ -9,8 +9,24 @@ import {
   Maximize2,
   Check,
   X,
+  ClipboardCheck,
+  FileSpreadsheet,
+  BarChart3,
+  Archive,
+  Truck,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+
+import { Button } from "@/components/ui/button";
+import {
+  MONTH_NAMES_CS,
+  formatDateCs,
+  generatePlan,
+} from "@/lib/scheduler";
+import { useAuditorsStore } from "@/lib/auditors-store";
+import { useZonesStore } from "@/lib/zones-store";
+import { supabase } from "@/integrations/supabase/client";
+import { useDepartment } from "@/lib/department-store";
 
 import { Button } from "@/components/ui/button";
 import {
