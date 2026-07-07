@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { CHECKLIST } from "@/lib/checklist";
 import { DEFAULT_AUDITORS } from "@/lib/scheduler";
+import { useDepartment, type Department } from "@/lib/department-store";
 
 // Mapping of Z-groups (reporting zones) to underlying L-zones (audit zones)
 const Z_GROUPS: Record<string, string[]> = {
@@ -70,10 +71,13 @@ const RADAR_COLORS = ["hsl(48 98% 52%)", "hsl(28 95% 55%)", "hsl(200 80% 50%)", 
 
 
 function EvaluationPage() {
+  const { department } = useDepartment();
+  const [scope, setScope] = useState<Department | "all">(department);
   const [zoneFilter, setZoneFilter] = useState<string>("");
   const [auditorFilter, setAuditorFilter] = useState<string>("");
   const [monthFilter, setMonthFilter] = useState<string>("");
-  
+  // Keep scope in sync when user toggles department in header
+  useMemo(() => setScope(department), [department]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["evaluation"],
@@ -90,14 +94,15 @@ function EvaluationPage() {
 
   const filtered = useMemo(() => {
     if (!data) return null;
-    let audits = data.audits;
-    if (zoneFilter) audits = audits.filter((a) => zoneToGroup(a.zone) === zoneFilter);
+    let audits = data.audits as Array<typeof data.audits[number] & { department?: string }>;
+    if (scope !== "all") audits = audits.filter((a) => (a.department ?? "vyroba") === scope);
+    if (zoneFilter && scope === "vyroba") audits = audits.filter((a) => zoneToGroup(a.zone) === zoneFilter);
     if (auditorFilter) audits = audits.filter((a) => a.auditor === auditorFilter);
     if (monthFilter) audits = audits.filter((a) => a.audit_date.startsWith(monthFilter));
     const auditIds = new Set(audits.map((a) => a.id));
     const scores = data.scores.filter((s) => auditIds.has(s.audit_id));
     return { audits, scores };
-  }, [data, zoneFilter, auditorFilter, monthFilter]);
+  }, [data, scope, zoneFilter, auditorFilter, monthFilter]);
 
   // Single aggregated series — always one black line driven by current filters
   const radarData = useMemo(() => {
@@ -159,8 +164,20 @@ function EvaluationPage() {
 
   const months = useMemo(() => {
     if (!data) return [];
-    return Array.from(new Set(data.audits.map((a) => a.audit_date.slice(0, 7)))).sort();
-  }, [data]);
+    const audits = scope === "all"
+      ? data.audits
+      : data.audits.filter((a) => ((a as { department?: string }).department ?? "vyroba") === scope);
+    return Array.from(new Set(audits.map((a) => a.audit_date.slice(0, 7)))).sort();
+  }, [data, scope]);
+
+  const auditorOptions = useMemo(() => {
+    if (scope === "vyroba") return DEFAULT_AUDITORS;
+    if (!data) return [];
+    const audits = scope === "all"
+      ? data.audits
+      : data.audits.filter((a) => ((a as { department?: string }).department ?? "vyroba") === scope);
+    return Array.from(new Set(audits.map((a) => a.auditor))).sort();
+  }, [data, scope]);
 
   const totalAudits = filtered?.audits.length ?? 0;
   const avgPct = filtered && filtered.audits.length > 0
@@ -276,15 +293,42 @@ function EvaluationPage() {
         </Button>
       </section>
 
+      {/* Scope toggle */}
+      <section className="border-2 border-ink bg-card p-4 shadow-[3px_3px_0_0_#000] flex flex-wrap items-center gap-3 no-print">
+        <Label className="font-mono text-[10px] uppercase tracking-[0.2em]">Rozsah dat</Label>
+        <div className="flex border-2 border-ink shadow-[2px_2px_0_0_#000]">
+          {([
+            { k: "vyroba", label: "Výroba" },
+            { k: "logistika", label: "Logistika" },
+            { k: "all", label: "Celkové (Výroba + Logistika)" },
+          ] as const).map((opt, i) => (
+            <button
+              key={opt.k}
+              type="button"
+              onClick={() => { setScope(opt.k); setAuditorFilter(""); setZoneFilter(""); }}
+              className={`px-3 py-1.5 font-mono text-[11px] uppercase tracking-wider transition-colors ${i > 0 ? "border-l-2 border-ink" : ""} ${scope === opt.k ? "bg-primary text-primary-foreground" : "bg-card hover:bg-accent/40"}`}
+              aria-pressed={scope === opt.k}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
       {/* Filters */}
       <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000] grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
         <div className="space-y-1.5">
           <Label className="font-mono text-[10px] uppercase tracking-[0.2em] flex items-center gap-1">
             <Filter className="h-3 w-3" /> Zóna (Z)
           </Label>
-          <select value={zoneFilter} onChange={(e) => setZoneFilter(e.target.value)} className="w-full border-2 border-input bg-background px-3 py-2 font-mono text-sm">
-            <option value="">Všechny zóny</option>
-            {Z_GROUP_KEYS.map((z) => (
+          <select
+            value={zoneFilter}
+            onChange={(e) => setZoneFilter(e.target.value)}
+            disabled={scope !== "vyroba"}
+            className="w-full border-2 border-input bg-background px-3 py-2 font-mono text-sm disabled:opacity-50"
+          >
+            <option value="">{scope === "vyroba" ? "Všechny zóny" : "— (jen pro Výrobu)"}</option>
+            {scope === "vyroba" && Z_GROUP_KEYS.map((z) => (
               <option key={z} value={z}>{z} ({Z_GROUPS[z].join(", ")})</option>
             ))}
           </select>
@@ -293,7 +337,7 @@ function EvaluationPage() {
           <Label className="font-mono text-[10px] uppercase tracking-[0.2em]">Auditor</Label>
           <select value={auditorFilter} onChange={(e) => setAuditorFilter(e.target.value)} className="w-full border-2 border-input bg-background px-3 py-2 font-mono text-sm">
             <option value="">Všichni auditoři</option>
-            {DEFAULT_AUDITORS.map((a) => <option key={a} value={a}>{a}</option>)}
+            {auditorOptions.map((a) => <option key={a} value={a}>{a}</option>)}
           </select>
         </div>
         <div className="space-y-1.5">

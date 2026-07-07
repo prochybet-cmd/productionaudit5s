@@ -47,6 +47,9 @@ function AuditDetailPage() {
       </Link>
 
       <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000]">
+        <div className="mb-3 inline-flex items-center gap-2 border-2 border-ink bg-primary text-primary-foreground px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider">
+          Oddělení: {audit.department === "logistika" ? "Logistika" : "Výroba"}
+        </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Datum</div>

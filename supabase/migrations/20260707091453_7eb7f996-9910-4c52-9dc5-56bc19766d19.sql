@@ -1,0 +1,2 @@
+ALTER TABLE public.audits ADD COLUMN IF NOT EXISTS department text NOT NULL DEFAULT 'vyroba' CHECK (department IN ('vyroba','logistika'));
+CREATE INDEX IF NOT EXISTS audits_department_idx ON public.audits(department);

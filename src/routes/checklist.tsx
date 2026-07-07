@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ClipboardCheck, Printer, RotateCcw, CheckCircle2, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,7 @@ import {
   scoreLabel,
 } from "@/lib/checklist";
 import { DEFAULT_AUDITORS, DEFAULT_ZONES } from "@/lib/scheduler";
+import { LOGISTICS_ZONES, useDepartment, DEPARTMENT_LABEL } from "@/lib/department-store";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/checklist")({
@@ -46,8 +47,10 @@ function todayIso() {
 
 function ChecklistPage() {
   const navigate = useNavigate();
-  const [zone, setZone] = useState<string>(DEFAULT_ZONES[0]);
-  const [auditor, setAuditor] = useState<string>(DEFAULT_AUDITORS[0]);
+  const { department } = useDepartment();
+  const zoneList = department === "logistika" ? LOGISTICS_ZONES : DEFAULT_ZONES;
+  const [zone, setZone] = useState<string>(zoneList[0]);
+  const [auditor, setAuditor] = useState<string>(department === "logistika" ? "" : DEFAULT_AUDITORS[0]);
   const [date, setDate] = useState<string>(todayIso());
   const [overallNote, setOverallNote] = useState<string>("");
   const [notes, setNotes] = useState<Record<number, string>>({});
@@ -57,6 +60,11 @@ function ChecklistPage() {
     for (const cat of CHECKLIST) for (const it of cat.items) init[it.id] = null;
     return init;
   });
+  useEffect(() => {
+    setZone(zoneList[0]);
+    setAuditor(department === "logistika" ? "" : DEFAULT_AUDITORS[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [department]);
 
   const subtotals = useMemo(
     () =>
@@ -99,14 +107,19 @@ function ChecklistPage() {
       toast.error("Vyplňte všech 25 položek před uložením.");
       return;
     }
+    if (!auditor.trim()) {
+      toast.error("Zadejte jméno auditora.");
+      return;
+    }
     setSaving(true);
     try {
       const { data: audit, error: e1 } = await supabase
         .from("audits")
         .insert({
-          zone, auditor, audit_date: date,
+          zone, auditor: auditor.trim(), audit_date: date,
           total_score: total, max_score: MAX_TOTAL,
           note: overallNote || null,
+          department,
         })
         .select()
         .single();
@@ -168,6 +181,11 @@ function ChecklistPage() {
         </div>
       </section>
 
+      {/* Department badge */}
+      <div className="inline-flex items-center gap-2 border-2 border-ink bg-primary text-primary-foreground px-3 py-1 font-mono text-[10px] uppercase tracking-wider shadow-[2px_2px_0_0_#000] w-max">
+        Oddělení: {DEPARTMENT_LABEL[department]}
+      </div>
+
       {/* Header form */}
       <section className="border-2 border-ink bg-card p-5 shadow-[3px_3px_0_0_#000] grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-1.5">
@@ -177,22 +195,31 @@ function ChecklistPage() {
             onChange={(e) => setZone(e.target.value)}
             className="w-full border-2 border-input bg-background px-3 py-2 font-mono text-sm"
           >
-            {DEFAULT_ZONES.map((z) => (
+            {zoneList.map((z) => (
               <option key={z} value={z}>{z}</option>
             ))}
           </select>
         </div>
         <div className="space-y-1.5">
           <Label className="font-mono text-[10px] uppercase tracking-[0.2em]">Auditor</Label>
-          <select
-            value={auditor}
-            onChange={(e) => setAuditor(e.target.value)}
-            className="w-full border-2 border-input bg-background px-3 py-2 font-mono text-sm"
-          >
-            {DEFAULT_AUDITORS.map((a) => (
-              <option key={a} value={a}>{a}</option>
-            ))}
-          </select>
+          {department === "logistika" ? (
+            <Input
+              value={auditor}
+              onChange={(e) => setAuditor(e.target.value)}
+              placeholder="Jméno auditora"
+              className="font-mono text-sm"
+            />
+          ) : (
+            <select
+              value={auditor}
+              onChange={(e) => setAuditor(e.target.value)}
+              className="w-full border-2 border-input bg-background px-3 py-2 font-mono text-sm"
+            >
+              {DEFAULT_AUDITORS.map((a) => (
+                <option key={a} value={a}>{a}</option>
+              ))}
+            </select>
+          )}
         </div>
         <div className="space-y-1.5">
           <Label className="font-mono text-[10px] uppercase tracking-[0.2em]">Datum</Label>
