@@ -366,3 +366,55 @@ function KpiCard({
   );
 }
 
+function LogisticsHome() {
+  const tiles = [
+    { to: "/checklist", label: "Checklist", desc: "On-line vyplnění 5S auditu (25 položek)", icon: ClipboardCheck },
+    { to: "/data-entry", label: "Zápis dat", desc: "Rychlý přepis papírového checklistu", icon: FileSpreadsheet },
+    { to: "/evaluation", label: "Vyhodnocení", desc: "Grafy skóre, filtry, tisk A4", icon: BarChart3 },
+    { to: "/archive", label: "Archiv", desc: "Všechny uložené audity logistiky", icon: Archive },
+  ] as const;
+  return (
+    <div className="mx-auto max-w-5xl px-6 py-10 space-y-8">
+      <section>
+        <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+          Oddělení
+        </div>
+        <h1 className="font-display text-5xl text-ink mt-1 flex items-center gap-3">
+          <Truck className="h-10 w-10 text-primary" />
+          Logistika · 5S audity
+        </h1>
+        <p className="text-sm text-muted-foreground mt-2 max-w-2xl">
+          Zóny 1/11 – 11/11. Pro logistiku není plánovač auditů — audity zaznamenávejte
+          přímo v Checklistu nebo Zápisu dat. Uložené záznamy najdete v Archivu
+          a v Vyhodnocení.
+        </p>
+      </section>
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {tiles.map((t) => {
+          const Icon = t.icon;
+          return (
+            <Link
+              key={t.to}
+              to={t.to}
+              className="stamp bg-card p-6 hover:bg-accent/40 transition-colors group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="grid h-12 w-12 place-items-center bg-primary text-primary-foreground border-2 border-ink shadow-[2px_2px_0_0_#000]">
+                  <Icon className="h-6 w-6" />
+                </div>
+                <div>
+                  <div className="font-display text-2xl tracking-wider">{t.label}</div>
+                  <div className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mt-0.5">
+                    {t.desc}
+                  </div>
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </section>
+    </div>
+  );
+}
+
+
