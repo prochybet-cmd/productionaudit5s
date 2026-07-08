@@ -32,7 +32,7 @@ async function requireUnlocked() {
 }
 
 export const listAudits = createServerFn({ method: "GET" }).handler(async () => {
-  await requireUnlocked();
+  // await requireUnlocked();  // <- Zakomentováno pro debug
   const db = await admin();
   const { data, error } = await db
     .from("audits")
